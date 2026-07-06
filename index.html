@@ -56,6 +56,11 @@ input:focus, select:focus { outline: none; border-color: var(--primary); backgro
 .dropdown.show{ display: block; animation: fadeInDrop 0.2s ease forwards; }
 h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transition: color 0.4s ease;}
 
+/* Clickable Sendable Elements */
+.clickable-sendable { cursor: pointer; padding: 10px; border-radius: 12px; transition: background-color 0.3s ease; border: 1px solid transparent; }
+.clickable-sendable.pop:hover { background-color: rgba(37, 99, 235, 0.05); border-color: rgba(37, 99, 235, 0.2); }
+.clickable-sendable.hv:hover { background-color: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2); }
+
 /* Invoice Modal Styles */
 .invoice-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 23, 42, 0.7); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
 .invoice-modal.show { display: flex; animation: fadeInDrop 0.2s ease forwards; }
@@ -95,6 +100,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
         </div>
     </div>
 
+    <!-- REFACTORED CLICKABLE TEXT-BASED BACKUP & RESTORE CARD -->
     <div class="card" style="border: 2px solid var(--warning); margin-top: 20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; cursor: pointer; user-select: none;" onclick="toggleCard('backupContent', 'backupIcon')">
             <h3 style="color:var(--warning); margin:0; display:flex; align-items:center; gap:6px;">
@@ -312,16 +318,20 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
         </h3>
     </div>
 
-    <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(145deg, var(--card-bg), rgba(37, 99, 235, 0.03));">
-        <h3 style="margin-top:0; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">online_prediction</span> Sendable Capacity</h3>
-        <div style="margin-bottom:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span style="font-weight:800; font-size:15px;">Sendable Pop :-</span><span style="font-weight:900; color:var(--primary); font-size:18px;" id="calcPopInstant">0</span></div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-muted); background:var(--bg-color); padding:8px 12px; border-radius:8px;"><span style="font-weight:600;">Total Sendable Pop after 15 min Gameplay :-</span><span style="font-weight:800; color:var(--primary);" id="calcPop15m">0</span></div>
+    <!-- REFACTORED CLICKABLE SENDABLE CAPACITY CARD -->
+    <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(145deg, var(--card-bg), rgba(37, 99, 235, 0.03)); padding-bottom: 10px;">
+        <h3 style="margin-top:0; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">online_prediction</span> Sendable Capacity</h3>
+        
+        <div class="clickable-sendable pop" onclick="showSendableDetails('pop')">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span style="font-weight:800; font-size:15px; display:flex; align-items:center; gap:6px;">Sendable Pop <span class="material-icons" style="font-size:14px; color:var(--text-muted);">touch_app</span></span><span style="font-weight:900; color:var(--primary); font-size:18px;" id="calcPopInstant">0</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-muted); background:var(--bg-color); padding:8px 12px; border-radius:8px;"><span style="font-weight:600;">Total Sendable after 15m :-</span><span style="font-weight:800; color:var(--primary);" id="calcPop15m">0</span></div>
         </div>
-        <hr style="border:none; border-top:1px dashed var(--border); margin:16px 0;">
-        <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span style="font-weight:800; font-size:15px;">Sendable Home Votes :-</span><span style="font-weight:900; color:var(--success); font-size:18px;" id="calcHVInstant">0</span></div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-muted); background:var(--bg-color); padding:8px 12px; border-radius:8px;"><span style="font-weight:600;">Total Sendable Home Votes after 15 min Gameplay :-</span><span style="font-weight:800; color:var(--success);" id="calcHV15m">0</span></div>
+        
+        <hr style="border:none; border-top:1px dashed var(--border); margin:8px 0;">
+        
+        <div class="clickable-sendable hv" onclick="showSendableDetails('hv')">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span style="font-weight:800; font-size:15px; display:flex; align-items:center; gap:6px;">Sendable HV <span class="material-icons" style="font-size:14px; color:var(--text-muted);">touch_app</span></span><span style="font-weight:900; color:var(--success); font-size:18px;" id="calcHVInstant">0</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-muted); background:var(--bg-color); padding:8px 12px; border-radius:8px;"><span style="font-weight:600;">Total Sendable after 15m :-</span><span style="font-weight:800; color:var(--success);" id="calcHV15m">0</span></div>
         </div>
     </div>
 
@@ -378,6 +388,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
         <button class="action-btn" style="background-color:var(--warning); color:#fff; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="toggleHeliInjectCard()"><span class="material-icons">add_box</span> Add Stock</button>
     </div>
 
+    <!-- DIRECT QUICK INJECTION CARD FOR HELICOPTERS (COLLAPSIBLE) -->
     <div class="card" id="quickHeliInjectCard" style="display:none; border: 2px solid var(--warning); margin-bottom: 20px; background: linear-gradient(145deg, var(--card-bg), rgba(245, 158, 11, 0.02));">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="color:var(--warning); margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">flight_takeoff</span> Quick Inject Heli</h3>
@@ -390,6 +401,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
         <button class="save-btn" style="background-color:var(--warning); color:#fff; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px;" onclick="addHeliDirectly()"><span class="material-icons">add</span> Inject Directly</button>
     </div>
     
+    <!-- HELI HOLDERS SUMMARY CARD -->
     <div class="card" style="border: 1px solid var(--warning); margin-bottom: 20px;">
         <h3 style="color:var(--warning); margin-top:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">radar</span> Active Heli Holders</h3>
         <div id="activeHeliHoldersList"></div>
@@ -561,6 +573,20 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
                 <span style="font-weight:600; color:var(--text-muted); font-size:13px; text-transform:uppercase;">Helicopters</span>
                 <span id="qcHeliVal" style="font-weight:900; color:var(--warning); font-size:18px;">0</span>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- SENDABLE BREAKDOWN MODAL -->
+<div id="sendableDetailsModal" class="invoice-modal">
+    <div class="invoice-modal-content" style="max-width: 500px; padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 id="sendableModalTitle" style="margin:0; display:flex; align-items:center; gap:8px; color:var(--primary);"><span class="material-icons">online_prediction</span> Sendable Breakdown</h3>
+            <button class="menu-btn" onclick="closeSendableDetailsModal()"><span class="material-icons">close</span></button>
+        </div>
+        
+        <div id="sendableDetailsList" style="max-height: 50vh; overflow-y: auto; padding-right: 5px;">
+            <!-- Content generated dynamically -->
         </div>
     </div>
 </div>
@@ -1332,7 +1358,6 @@ function renderActiveHeliHolders() {
     c.innerHTML = "";
     let holders = [];
     
-    // 1. From Label Vaults
     heliLabelGroups.forEach(g => {
         g.accounts.forEach(a => {
             if (a.heli && a.heli > 0) {
@@ -1341,7 +1366,6 @@ function renderActiveHeliHolders() {
         });
     });
     
-    // 2. From Manual External Stock Events
     let extMap = new Map();
     stockEvents.forEach(e => {
         if (e.type === "Helicopters" && e.injectedToLabels === undefined && e.vaultSynced === undefined) {
@@ -1672,6 +1696,88 @@ function performQuickCheck() {
     }
 
     resBox.style.display = "block";
+}
+
+// --- SENDABLE BREAKDOWN DETAILS ---
+function showSendableDetails(type) {
+    const c = document.getElementById("sendableDetailsList");
+    const t = document.getElementById("sendableModalTitle");
+    c.innerHTML = "";
+    
+    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    let accountsWithSendable = [];
+    
+    if (type === 'pop') {
+        t.innerHTML = `<span class="material-icons">online_prediction</span> Sendable Pop Details`;
+        t.style.color = "var(--primary)";
+        
+        popLabelGroups.forEach(g => {
+            g.accounts.forEach(a => {
+                let s = a.pop || 0;
+                if (s > 0) {
+                    let l = a.level || "Below 10 level";
+                    let inst = 0, f15 = 0;
+                    if (l === "Level 30+") { inst = s; f15 = s; } 
+                    else if (l === "Level 25+" || l === "Level 10+") { inst = Math.min(s, 24000); f15 = Math.min(s, 24000); } 
+                    else { inst = 0; f15 = Math.min(s, 24000); }
+                    
+                    if (f15 > 0) {
+                        accountsWithSendable.push({ name: a.name, label: g.label, inst: inst, f15: f15, total: s, color: 'var(--primary)' });
+                    }
+                }
+            });
+        });
+    } else if (type === 'hv') {
+        t.innerHTML = `<span class="material-icons">online_prediction</span> Sendable HV Details`;
+        t.style.color = "var(--success)";
+        
+        hvLabelGroups.forEach(g => {
+            g.accounts.forEach(a => {
+                let s = a.hv || 0;
+                if (s > 0) {
+                    let l = a.level || "Below 10 level";
+                    let inst = 0, f15 = 0;
+                    if (l === "Level 30+") { inst = s; f15 = s; } 
+                    else if (l === "Level 25+") { inst = Math.min(s, 20000); f15 = Math.min(s, 20000); } 
+                    else { inst = 0; f15 = Math.min(s, 20000); }
+                    
+                    if (f15 > 0) {
+                        accountsWithSendable.push({ name: a.name, label: g.label, inst: inst, f15: f15, total: s, color: 'var(--success)' });
+                    }
+                }
+            });
+        });
+    }
+
+    if (accountsWithSendable.length === 0) {
+        c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No sendable stock found.</div>`;
+    } else {
+        accountsWithSendable.sort((a, b) => b.f15 - a.f15); // Sort by highest sendable after 15m
+        
+        accountsWithSendable.forEach(acc => {
+            html += `<div style="background:var(--bg-color); padding:12px; border-radius:10px; border:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div>
+                        <div style="font-weight:800; font-size:14px; color:var(--text-color);">${acc.name}</div>
+                        <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">${acc.label}</div>
+                    </div>
+                    <div style="font-size:12px; font-weight:700; background:rgba(148, 163, 184, 0.1); padding:4px 8px; border-radius:6px; color:var(--text-muted);">Stock: ${formatStockValue(acc.total)}</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:12px;">
+                    <div><span style="color:var(--text-muted); font-weight:600;">Instant:</span> <strong style="color:${acc.color};">${formatStockValue(acc.inst)}</strong></div>
+                    <div><span style="color:var(--text-muted); font-weight:600;">After 15m:</span> <strong style="color:${acc.color};">${formatStockValue(acc.f15)}</strong></div>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+        c.innerHTML = html;
+    }
+
+    document.getElementById("sendableDetailsModal").classList.add("show");
+}
+
+function closeSendableDetailsModal() {
+    document.getElementById("sendableDetailsModal").classList.remove("show");
 }
   
 window.onload = function() {  
