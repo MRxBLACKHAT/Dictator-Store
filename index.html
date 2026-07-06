@@ -1,0 +1,1239 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+<title>Dictator E-Store</title>  
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>  
+:root{  
+    --primary: #2563eb; --secondary: #7c3aed; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --gold: #eab308; --level: #8b5cf6;
+    --bg-color: #f1f5f9; --text-color: #0f172a; --text-muted: #64748b; --card-bg: #ffffff; --border: #e2e8f0; --nav-bg: #ffffff; --nav-text: #94a3b8;
+    --shadow: 0 10px 30px -5px rgba(148, 163, 184, 0.1), 0 4px 12px -5px rgba(148, 163, 184, 0.05);
+}  
+body.dark-mode {
+    --bg-color: #000000; --text-color: #f1f5f9; --text-muted: #94a3b8; --card-bg: #000000; --border: #333333; --nav-bg: #000000; --nav-text: #475569; --shadow: none;
+}
+*{ margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }  
+body{ color: var(--text-color); background-color: var(--bg-color); min-height: 100vh; transition: background-color 0.4s ease, color 0.4s ease; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background-color: transparent; }
+::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 10px; }
+.page{ display: none; padding: 20px 16px 100px 16px; animation: fadeSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.page.active{ display: block; }
+@keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+.header{ margin-bottom: 24px; }  
+.header h1{ font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; font-weight: 500; transition: color 0.4s ease; }
+.card, .order-card, .stat-card { background-color: var(--card-bg); border-radius: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: background-color 0.4s ease, border-color 0.4s ease; }  
+.card { padding: 20px; margin-bottom: 16px; } .order-card { border-radius: 20px; padding: 18px; margin-bottom: 12px; } .stat-card { padding: 18px; }
+.stat-card:active { transform: scale(0.97); transition: transform 0.1s ease; }
+.stats-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }  
+.stat-title{ font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; transition: color 0.4s ease; }  
+.stat-value{ font-size: 26px; font-weight: 800; margin-top: 8px; letter-spacing: -0.5px; }  
+.action-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }  
+.action-btn, .save-btn { border: none; border-radius: 16px; padding: 16px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow); transition: background-color 0.4s ease, color 0.4s ease, transform 0.15s ease; }
+.save-btn { width: 100%; background-color: var(--primary); color: white; border-radius: 14px; font-size: 16px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+.action-btn:active, .save-btn:active { transform: scale(0.96); }
+.btn-blue{ background-color: var(--primary); color: white; } .btn-purple{ background-color: var(--secondary); color: white; } .btn-dark{ background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border); } .btn-black{ background-color: #000000; color: #ffffff;} .btn-gold{ background-color: var(--gold); color: #ffffff;} .btn-level{ background-color: var(--level); color: #ffffff;}
+body.dark-mode .btn-black { background-color: #ffffff; color: #000000; }
+.form-group{ margin-bottom: 16px; }  
+label{ display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: var(--text-color); transition: color 0.4s ease; }  
+input, select{ width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 14px; font-size: 15px; font-weight: 500; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease; }  
+input:focus, select:focus { outline: none; border-color: var(--primary); background-color: var(--card-bg); }
+.order-id{ font-size: 13px; font-weight: 700; color: var(--primary); background-color: rgba(37, 99, 235, 0.1); padding: 6px 10px; border-radius: 8px; display: inline-block; }  
+.bottom-nav{ position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background-color: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); z-index: 1000; transition: background-color 0.4s ease, border-color 0.4s ease; }  
+.nav-btn{ background: none; border: none; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--nav-text); transition: color 0.4s ease, transform 0.2s ease; width: 60px; }  
+.nav-btn .material-icons { font-size: 26px; color: var(--nav-text); transition: color 0.4s ease; }
+.nav-btn.active { color: var(--primary); } .nav-btn.active .material-icons { color: var(--primary); transform: translateY(-4px); }
+.order-actions{ position: relative; float: right; }  
+.menu-btn{ border: none; background-color: transparent; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: background-color 0.3s ease, color 0.4s ease; }
+.menu-btn:hover { background-color: var(--bg-color); color: var(--text-color); }
+.dropdown{ display: none; position: absolute; right: 0; top: 36px; background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 999; min-width: 140px; overflow: hidden; transition: background-color 0.4s ease, border-color 0.4s ease; }  
+.dropdown button{ width: 100%; border: none; background-color: transparent; padding: 14px 16px; text-align: left; cursor: pointer; color: var(--text-color); font-size: 14px; font-weight: 500; transition: background-color 0.2s ease, color 0.4s ease; }  
+.dropdown button:hover{ background-color: var(--bg-color); }  
+.dropdown.show{ display: block; animation: fadeInDrop 0.2s ease forwards; }
+h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transition: color 0.4s ease;}
+
+/* Invoice Modal Styles */
+.invoice-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 23, 42, 0.7); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+.invoice-modal.show { display: flex; animation: fadeInDrop 0.2s ease forwards; }
+.invoice-modal-content { background-color: var(--bg-color); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; }
+.close-modal-btn { position: absolute; top: 15px; right: 15px; background: rgba(148, 163, 184, 0.2); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-color); z-index: 10; transition: background 0.3s ease; }
+.close-modal-btn:hover { background: rgba(148, 163, 184, 0.4); }
+</style>  
+</head>  
+<body>  
+
+<div id="homePage" class="page active">  
+    <div class="header">  
+        <h1>Dictator E-Store</h1><p>Business Analytics Dashboard</p>  
+    </div>  
+    <div class="stats-grid">  
+        <div class="stat-card"><div class="stat-title">Net Profit</div><div class="stat-value" id="profitAmount" style="color: var(--success);">₹0</div></div>  
+        <div class="stat-card"><div class="stat-title">Total Orders</div><div class="stat-value" id="totalOrders">0</div></div>  
+        <div class="stat-card"><div class="stat-title">Pending</div><div class="stat-value" id="pendingOrders" style="color: var(--warning);">0</div></div>  
+        <div class="stat-card"><div class="stat-title">Paid</div><div class="stat-value" id="paidOrders" style="color: var(--primary);">0</div></div>  
+    </div>  
+    <div class="action-grid">  
+        <button class="action-btn btn-blue" onclick="showPage('ordersPage')"><span class="material-icons" style="font-size:20px; vertical-align:middle;">add_circle</span> New Order</button>  
+        <button class="action-btn btn-purple" onclick="showPage('resellPage')"><span class="material-icons" style="font-size:20px; vertical-align:middle;">storefront</span> New Resell</button>  
+        <button class="action-btn btn-dark" onclick="showPage('stockPage')"><span class="material-icons" style="font-size:20px; vertical-align:middle;">inventory_2</span> Stock Peek</button>  
+        <button class="action-btn btn-black" onclick="showPage('ledgerPage')"><span class="material-icons" style="font-size:20px; vertical-align:middle;">menu_book</span> Ledger</button>
+        <button class="action-btn" style="background-color:#14b8a6; color:#fff; grid-column: span 2; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="showPage('accountsManagerPage')"><span class="material-icons">manage_accounts</span> Accounts Manager</button>  
+    </div>  
+    <div class="card" style="margin-top: 20px;">
+        <button class="save-btn" style="background-color: var(--danger); display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="resetMonthData()"><span class="material-icons">restart_alt</span> Reset Monthly Data</button>
+    </div>
+    <h3 style="margin-top:24px; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">history</span> Recent Orders</h3>  
+    <div id="recentOrders"></div>  
+    <button class="action-btn btn-dark" style="width: 100%; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px;" onclick="toggleDarkMode()"><span class="material-icons" id="darkModeIcon">dark_mode</span><span id="darkModeText">Enable Dark Mode</span></button>
+</div>  
+
+<div id="accountsManagerPage" class="page">
+    <div class="header" style="display:flex; align-items:center; gap:15px;">
+        <button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('homePage')"><span class="material-icons">arrow_back</span></button><h2 style="margin:0;">Accounts Manager</h2>
+    </div>
+
+    <div class="card" style="border: 2px solid #14b8a6; margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; cursor: pointer; user-select: none;" onclick="toggleCard('accVaultContent', 'accVaultIcon')">
+            <h3 style="color:#14b8a6; margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">badge</span> Account Vaults</h3>
+            <span class="material-icons" id="accVaultIcon" style="color:var(--text-muted); transition: transform 0.3s ease;">expand_more</span>
+        </div>
+        <div id="accVaultContent" style="display: none; margin-top: 15px;">
+            <div class="stats-grid" style="margin-bottom: 15px;">
+                <div class="form-group" style="margin:0;"><label>Label (e.g., TEAM A)</label><input id="accLabelInput" placeholder="Enter label"></div>
+                <div class="form-group" style="margin:0;"><label>No. of Accounts</label><input type="number" id="accCountInput" placeholder="0"></div>
+            </div>
+            <button class="save-btn" style="background-color:#14b8a6; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="generateAccAccounts()"><span class="material-icons">library_add</span> Generate Accounts</button>
+            <div id="accLabelsList"></div>
+        </div>
+    </div>
+
+    <div class="card" id="levelManagerCard" style="border: 2px solid var(--level); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; cursor: pointer; user-select: none;" onclick="toggleCard('levelVaultContent', 'levelVaultIcon')">
+            <h3 style="color:var(--level); margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">tune</span> Account Levels Vault</h3>
+            <span class="material-icons" id="levelVaultIcon" style="color:var(--text-muted); transition: transform 0.3s ease;">expand_more</span>
+        </div>
+        <div id="levelVaultContent" style="display: none; margin-top: 15px;">
+            <div id="levelLabelsList"></div>
+        </div>
+    </div>
+</div>
+
+<div id="accGroupDetailsPage" class="page">
+    <div class="header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="closeAccGroupDetails()"><span class="material-icons">arrow_back</span></button><h2 id="accGroupDetailsTitle" style="margin:0; font-size:22px; color:var(--text-color);">Label</h2></div>
+    </div>
+    <div class="card" style="padding: 10px 16px; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted);">search</span><input id="accSearch" placeholder="Search accounts..." onkeyup="filterAccAccounts()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>
+    <div style="display:flex; gap:10px; margin-bottom: 20px;">
+        <button class="action-btn" style="background-color:#14b8a6; flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="addAccountToAccGroup()"><span class="material-icons">person_add</span> Add Account</button>
+        <button class="action-btn btn-purple" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="openAccModifyMultiple()"><span class="material-icons">playlist_add_check</span> Bulk Edit</button>
+    </div>
+    <div class="card" id="accModifyMultipleCard" style="display:none; border: 2px solid var(--secondary); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><h3 style="color:var(--secondary); margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">edit_note</span> Bulk Mod</h3><button class="menu-btn" onclick="closeAccModifyMultiple()"><span class="material-icons">close</span></button></div>
+        <div class="stats-grid"><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">From Account</label><select id="accModFrom"></select></div><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">To Account</label><select id="accModTo"></select></div></div>
+        <label style="margin-top:5px; margin-bottom:10px; font-size:12px; color:var(--text-muted); font-weight:700;">Set Properties</label>
+        <p style="font-size:11px; color:var(--text-muted); margin-bottom:15px; font-style:italic;">* Auto-increments numbers automatically</p>
+        <div class="form-group"><label style="font-size:12px;">X Username</label><input id="modAccUsername" placeholder="user1"></div><div class="form-group"><label style="font-size:12px;">Email</label><input id="modAccEmail" placeholder="user1@email.com"></div>
+        <button class="save-btn" style="background-color:var(--secondary); display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px;" onclick="applyAccModifyMultiple()"><span class="material-icons">check_circle</span> Apply</button>
+    </div>
+    <div id="accGroupAccountsContainer" style="padding-bottom:30px;"></div>
+</div>
+
+<div id="ordersPage" class="page">  
+    <div class="header"><h1>Create Order</h1></div>
+    <div class="card">  
+        <div class="form-group"><label>Customer Name</label><input id="customerName" placeholder="Enter name"></div>  
+        <div class="form-group"><label>Item Category</label><select id="itemType" onchange="toggleItemFields()"><option>Popularity</option><option>Home Votes</option><option>UC</option></select></div>  
+        
+        <div id="stockItemFields">
+            <div class="form-group">
+                <label>Fulfillment Method</label>
+                <select id="fulfillmentMethod" onchange="toggleFulfillmentFields()">
+                    <option value="manual">Manual Entry (External Stock)</option>
+                    <option value="vault">Deduct from Vault (Internal Stock)</option>
+                </select>
+            </div>
+
+            <div id="manualFulfillmentFields">
+                <div class="stats-grid">
+                    <div class="form-group"><label>Quantity</label><input type="number" id="manualQuantity" placeholder="0"></div>  
+                    <div class="form-group"><label>Unit</label><select id="manualUnit"><option>K</option><option>M</option></select></div>  
+                </div>
+            </div>
+
+            <div id="vaultFulfillmentFields" style="display:none; padding:15px; border:1px dashed var(--primary); border-radius:12px; background-color:rgba(37, 99, 235, 0.05); margin-bottom:15px;">
+                <div style="font-weight:700; font-size:14px; color:var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                    <span class="material-icons" style="font-size:18px;">account_balance</span> Vault Source Deduction
+                </div>
+                <div class="form-group">
+                    <label style="font-size:12px; color:var(--text-muted);">Select Label Group</label>
+                    <select id="vaultLabel" onchange="updateVaultAccounts()"></select>
+                </div>
+                <div class="stats-grid">
+                    <div class="form-group"><label style="font-size:12px; color:var(--text-muted);">From Account</label><select id="vaultFrom" onchange="calculateVaultQty()"></select></div>
+                    <div class="form-group"><label style="font-size:12px; color:var(--text-muted);">To Account</label><select id="vaultTo" onchange="calculateVaultQty()"></select></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="form-group">
+                        <label style="font-size:12px; color:var(--text-muted);">Amount / Acc</label>
+                        <select id="vaultAmount" onchange="toggleVaultCustom()"></select>
+                    </div>
+                    <div class="form-group" id="vaultCustomDiv" style="display:none;">
+                        <label style="font-size:12px; color:var(--text-muted);">Custom (K)</label>
+                        <input type="number" id="vaultCustomAmount" placeholder="e.g. 50" oninput="calculateVaultQty()">
+                    </div>
+                </div>
+                <div style="font-size:15px; color:var(--text-color); font-weight:800; text-align:right; margin-top:5px; background:var(--card-bg); padding:8px 12px; border-radius:8px; border:1px solid var(--border);" id="vaultCalculatedQty">Total Deduction: 0K</div>
+            </div>
+
+            <div class="form-group"><label>Rate (/K)</label><input type="number" id="rate" placeholder="₹0"></div>  
+        </div>  
+
+        <div id="ucFields" style="display:none">  
+            <div class="form-group"><label>UC Pack</label><select id="ucPack"><option>60 UC</option><option>325 UC</option><option>660 UC</option><option>1800 UC</option><option>3850 UC</option><option>7500 UC</option></select></div>  
+            <div class="form-group"><label>Amount</label><input type="number" id="ucAmount" placeholder="₹0"></div>  
+        </div>  
+
+        <div class="form-group" style="margin-top:16px;"><label>Payment Status</label><select id="paymentStatus"><option value="Paid">✅ Paid</option><option value="Pending">⏳ Pending</option></select></div>  
+        <button id="saveOrderBtn" class="save-btn" onclick="saveOrder()" style="margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="material-icons">save</span> Save Order</button>  
+    </div>  
+    <h3 style="margin-top:24px;">All Orders</h3><div id="ordersContainer"></div>  
+</div>  
+
+<div id="billingPage" class="page">  
+    <div class="header"><h1>Billing Hub</h1></div>
+    <div class="card">  
+        <h3 style="color:var(--primary); display:flex; align-items:center; gap:8px;"><span class="material-icons">receipt</span> Auto Invoice</h3>  
+        <div class="stats-grid" style="margin-bottom: 15px;">
+            <div class="form-group" style="margin:0;"><label>From Order</label><select id="invoiceOrder"></select></div>
+            <div class="form-group" style="margin:0;"><label>Paid (₹)</label><input type="number" id="autoInvoicePaid" placeholder="0"></div>
+        </div>
+        <button class="save-btn" onclick="generateInvoice()">Create Single Invoice</button>  
+    </div>  
+    <div class="card">  
+        <h3 style="color:var(--secondary); display:flex; align-items:center; gap:8px;"><span class="material-icons">layers</span> Multi-Order Billing</h3>  
+        <div id="multiOrderList" style="max-height: 200px; overflow-y:auto; padding-right:5px; margin-bottom:15px;"></div>  
+        <div class="form-group"><label>Total Paid (₹)</label><input type="number" id="multiInvoicePaid" placeholder="0"></div>
+        <button class="save-btn" style="background-color:var(--secondary);" onclick="generateCombinedInvoice()">Create Combined Invoice</button>  
+    </div>  
+    <div class="card">  
+        <h3 style="color:var(--warning); display:flex; align-items:center; gap:8px;"><span class="material-icons">build</span> Custom Bill Creator</h3>  
+        <div class="stats-grid">
+            <div class="form-group"><input id="billCustomer" placeholder="Customer Name"></div>
+            <div class="form-group"><input type="number" id="customInvoicePaid" placeholder="Paid (₹)"></div>
+        </div>
+        <div id="billItemsContainer"></div>
+        <button class="action-btn btn-dark" style="width:100%; margin-bottom:15px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="addBillRow()"><span class="material-icons">add</span> Add Item Row</button>
+        <button class="save-btn" style="background-color:var(--warning); color:#fff;" onclick="createCustomBill()">Generate Custom Bill</button>  
+    </div>  
+    <div class="card" style="margin-top:20px;">  
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h3 style="margin:0;">Invoice Vault</h3><button class="menu-btn" onclick="deleteAllInvoices()"><span class="material-icons" style="color:var(--danger);">delete_sweep</span></button></div>
+        <div id="invoiceHistory"></div>  
+    </div>  
+</div>  
+
+<div id="stockPage" class="page">  
+    <div class="header"><h1>Stock Control</h1></div>
+    <div class="stats-grid" style="margin-bottom: 20px;">
+        <div class="stat-card" style="border-left: 4px solid var(--primary); cursor: pointer;" onclick="openPopVault()">
+            <div><div class="stat-title">Pop Stock</div><div class="stat-value" id="remainingPopStock" style="color: var(--primary);">0</div></div>
+            <div style="display:flex; flex-direction: column; gap:4px; margin-top:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--primary); background:rgba(37, 99, 235, 0.05); padding:4px 6px; border-radius:6px; font-weight:600;"><span>Internal Vault</span><strong id="intPopStock">0</strong></div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); background:var(--bg-color); border:1px solid var(--border); padding:3px 5px; border-radius:6px; font-weight:600;"><span>External</span><strong id="extPopStock">0</strong></div>
+            </div>
+            <div style="margin-top:12px; display:inline-flex; align-items:center; gap:4px; color:var(--primary); font-size:12px; font-weight:700; background-color:rgba(37, 99, 235, 0.1); padding:4px 8px; border-radius:8px;"><span class="material-icons" style="font-size:14px;">input</span> Access Vault</div>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid var(--success); cursor: pointer;" onclick="openHVVault()">
+            <div><div class="stat-title">HV Stock</div><div class="stat-value" id="remainingHVStock" style="color: var(--success);">0</div></div>
+            <div style="display:flex; flex-direction: column; gap:4px; margin-top:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--success); background:rgba(22, 163, 74, 0.05); padding:4px 6px; border-radius:6px; font-weight:600;"><span>Internal Vault</span><strong id="intHVStock">0</strong></div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); background:var(--bg-color); border:1px solid var(--border); padding:3px 5px; border-radius:6px; font-weight:600;"><span>External</span><strong id="extHVStock">0</strong></div>
+            </div>
+            <div style="margin-top:12px; display:inline-flex; align-items:center; gap:4px; color:var(--success); font-size:12px; font-weight:700; background-color:rgba(22, 163, 74, 0.1); padding:4px 8px; border-radius:8px;"><span class="material-icons" style="font-size:14px;">input</span> Access Vault</div>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid var(--warning); cursor: pointer;" onclick="openHeliVault()">
+            <div><div class="stat-title">Helicopters</div><div class="stat-value" id="totalHeliStock" style="color: var(--warning);">0</div></div>
+            <div style="margin-top:12px; display:inline-flex; align-items:center; gap:4px; color:var(--warning); font-size:12px; font-weight:700; background-color:rgba(245, 158, 11, 0.1); padding:4px 8px; border-radius:8px;"><span class="material-icons" style="font-size:14px;">input</span> Access Vault</div>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid var(--gold); cursor: pointer;" onclick="openGoldVault()">
+            <div><div class="stat-title">Gold Accs</div><div class="stat-value" id="totalGoldAccounts" style="color: var(--gold);">0</div></div>
+            <div style="margin-top:12px; display:inline-flex; align-items:center; gap:4px; color:var(--gold); font-size:12px; font-weight:700; background-color:rgba(234, 179, 8, 0.1); padding:4px 8px; border-radius:8px;"><span class="material-icons" style="font-size:14px;">input</span> Access Vault</div>
+        </div>
+    </div>
+    
+    <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(145deg, var(--card-bg), rgba(37, 99, 235, 0.03));">
+        <h3 style="margin-top:0; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">online_prediction</span> Sendable Capacity</h3>
+        <div style="margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span style="font-weight:800; font-size:15px;">Sendable Pop :-</span><span style="font-weight:900; color:var(--primary); font-size:18px;" id="calcPopInstant">0</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-muted); background:var(--bg-color); padding:8px 12px; border-radius:8px;"><span style="font-weight:600;">Total Sendable Pop after 15 min Gameplay :-</span><span style="font-weight:800; color:var(--primary);" id="calcPop15m">0</span></div>
+        </div>
+        <hr style="border:none; border-top:1px dashed var(--border); margin:16px 0;">
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span style="font-weight:800; font-size:15px;">Sendable Home Votes :-</span><span style="font-weight:900; color:var(--success); font-size:18px;" id="calcHVInstant">0</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-muted); background:var(--bg-color); padding:8px 12px; border-radius:8px;"><span style="font-weight:600;">Total Sendable Home Votes after 15 min Gameplay :-</span><span style="font-weight:800; color:var(--success);" id="calcHV15m">0</span></div>
+        </div>
+    </div>
+
+    <div class="card">  
+        <h3 style="margin-bottom: 15px; display:flex; align-items:center; gap:8px;"><span class="material-icons">add_box</span> Add Inventory</h3>
+        
+        <div class="form-group"><label>Category</label><select id="stockType" onchange="toggleStockType()"><option value="Popularity">Popularity</option><option value="Home Votes">Home Votes</option><option value="Helicopters">Helicopters</option></select></div>
+        
+        <div class="form-group" id="stockDestinationGroup"><label>Destination</label><select id="stockDestination" onchange="toggleStockDestination()"><option value="internal">Internal Vault</option><option value="external">External Stock</option></select></div>
+        
+        <div class="form-group" id="unifiedEventNameGroup"><label id="eventNameLabel">Event Name</label><input id="eventName" placeholder="Summer Event"></div>
+        
+        <div id="popFields">  
+            <div id="popTargetLabelsGroup" class="form-group"><label>Target Labels</label><div id="popLabelSelectContainer" style="max-height: 140px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--bg-color); display: flex; flex-direction: column; gap: 10px;"></div></div>
+            <div id="popInternalRateGroup" class="stats-grid">
+                <div class="form-group"><label>Rate / Acc</label><select id="popPerAccSelect" onchange="toggleCustomPopRate()"><option value="15">15K</option><option value="24">24K</option><option value="custom">Custom</option></select></div>
+                <div class="form-group" id="popPerAccCustomDiv" style="display:none;"><label>Custom (K)</label><input type="number" id="popPerAccCustom" placeholder="0"></div>
+            </div>
+            <div class="form-group" id="popExternalQtyGroup" style="display:none;"><label>Total Quantity (K)</label><input type="number" id="popExternalQty" placeholder="0"></div>
+        </div>  
+
+        <div id="hvFields" style="display:none">  
+            <div id="hvTargetLabelsGroup" class="form-group"><label>Target Labels</label><div id="hvLabelSelectContainer" style="max-height: 140px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--bg-color); display: flex; flex-direction: column; gap: 10px;"></div></div>
+            <div id="hvInternalQtyGroup" class="form-group"><label>Quantity per Acc (Cards)</label><input type="number" id="hvPerAcc" placeholder="0"></div>
+            <div class="form-group" id="hvExternalQtyGroup" style="display:none;"><label>Total Cards</label><input type="number" id="hvExternalQty" placeholder="0"></div>
+        </div>  
+
+        <div id="heliFields" style="display:none">  
+            <div class="form-group"><label>Account / ID Name</label><input id="heliIdName" placeholder="Main ID"></div>
+            <div class="form-group"><label>No. of Helicopters</label><input type="number" id="heliCount" placeholder="0"></div>
+        </div>  
+        
+        <button class="save-btn" style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="saveStockEvent()"><span class="material-icons">inventory</span> Inject Stock</button>  
+    </div>  
+    
+    <h3 style="margin-top:24px;">Stock Registry</h3><div id="stockEvents"></div>  
+</div>  
+
+<div id="popVaultPage" class="page">
+    <div class="header" style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('stockPage')"><span class="material-icons">arrow_back</span></button><h2 style="margin:0; color:var(--primary);">Pop Accounts Vault</h2></div>
+    <div id="popLabelsList"></div>
+</div>
+
+<div id="hvVaultPage" class="page">
+    <div class="header" style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('stockPage')"><span class="material-icons">arrow_back</span></button><h2 style="margin:0; color:var(--success);">HV Accounts Vault</h2></div>
+    <div id="hvLabelsList"></div>
+</div>
+
+<div id="heliVaultPage" class="page">
+    <div class="header" style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('stockPage')"><span class="material-icons">arrow_back</span></button><h2 style="margin:0; color:var(--warning);">Heli Accounts Vault</h2></div>
+    <div id="heliManagerList"></div>
+</div>
+
+<div id="goldVaultPage" class="page">
+    <div class="header" style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('stockPage')"><span class="material-icons">arrow_back</span></button><h2 style="margin:0; color:var(--gold);">Gold Accounts Vault</h2></div>
+    <div id="goldLabelsList"></div>
+</div>
+
+<div id="popGroupDetailsPage" class="page">
+    <div class="header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="closePopGroupDetails()"><span class="material-icons">arrow_back</span></button><h2 id="popGroupDetailsTitle" style="margin:0; font-size:22px;">Label</h2></div>
+        <div style="background-color: rgba(37, 99, 235, 0.1); color: var(--primary); padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 16px;"><span id="activeGroupTotalM">0</span></div>
+    </div>
+    <div class="card" style="padding: 10px 16px; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted);">search</span><input id="popAccountSearch" placeholder="Search accounts..." onkeyup="filterPopAccounts()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>
+    <div style="display:flex; gap:10px; margin-bottom: 20px;"><button class="action-btn btn-purple" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="openModifyMultiple()"><span class="material-icons">playlist_add_check</span> Bulk Edit</button></div>
+    <div class="card" id="modifyMultipleCard" style="display:none; border: 2px solid var(--secondary); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><h3 style="color:var(--secondary); margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">edit_note</span> Bulk Mod</h3><button class="menu-btn" onclick="closeModifyMultiple()"><span class="material-icons">close</span></button></div>
+        <div class="stats-grid"><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">From</label><select id="modFrom"></select></div><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">To</label><select id="modTo"></select></div></div>
+        <label style="margin-top:5px; margin-bottom:10px; font-size:12px; color:var(--text-muted); font-weight:700;">Quantities</label>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom:15px;">
+            <div><div style="font-size:11px; font-weight:800; text-align:center;">1500</div><input type="number" id="mod1500" placeholder="-" style="padding:10px 4px; text-align:center;"></div>
+            <div><div style="font-size:11px; font-weight:800; text-align:center;">600</div><input type="number" id="mod600" placeholder="-" style="padding:10px 4px; text-align:center;"></div>
+            <div><div style="font-size:11px; font-weight:800; text-align:center;">400</div><input type="number" id="mod400" placeholder="-" style="padding:10px 4px; text-align:center;"></div>
+            <div><div style="font-size:11px; font-weight:800; text-align:center;">200</div><input type="number" id="mod200" placeholder="-" style="padding:10px 4px; text-align:center;"></div>
+        </div>
+        <button class="save-btn" style="background-color:var(--secondary); display:flex; align-items:center; justify-content:center; gap:8px;" onclick="applyModifyMultiple()"><span class="material-icons">check_circle</span> Apply</button>
+    </div>
+    <div id="popGroupAccountsContainer" style="padding-bottom:30px;"></div>
+</div>
+
+<div id="hvGroupDetailsPage" class="page">
+    <div class="header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="closeHVGroupDetails()"><span class="material-icons">arrow_back</span></button><h2 id="hvGroupDetailsTitle" style="margin:0; font-size:22px;">Label</h2></div>
+        <div style="background-color: rgba(22, 163, 74, 0.1); color: var(--success); padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 16px;"><span id="activeHVGroupTotalM">0</span></div>
+    </div>
+    <div class="card" style="padding: 10px 16px; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted);">search</span><input id="hvAccountSearch" placeholder="Search accounts..." onkeyup="filterHVAccounts()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>
+    <div style="display:flex; gap:10px; margin-bottom: 20px;"><button class="action-btn btn-purple" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="openHVModifyMultiple()"><span class="material-icons">playlist_add_check</span> Bulk Edit</button></div>
+    <div class="card" id="hvModifyMultipleCard" style="display:none; border: 2px solid var(--secondary); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><h3 style="color:var(--secondary); margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">edit_note</span> Bulk Mod</h3><button class="menu-btn" onclick="closeHVModifyMultiple()"><span class="material-icons">close</span></button></div>
+        <div class="stats-grid"><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">From</label><select id="hvModFrom"></select></div><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">To</label><select id="hvModTo"></select></div></div>
+        <div style="margin-bottom:15px;"><div style="font-size:11px; font-weight:800; margin-bottom:6px;">No. of CARDS</div><input type="number" id="modHVCards" placeholder="Cards" style="padding: 12px; text-align: center; border-color:var(--secondary);"></div>
+        <button class="save-btn" style="background-color:var(--secondary); display:flex; align-items:center; justify-content:center; gap:8px;" onclick="applyHVModifyMultiple()"><span class="material-icons">check_circle</span> Apply</button>
+    </div>
+    <div id="hvGroupAccountsContainer" style="padding-bottom:30px;"></div>
+</div>
+
+<div id="goldGroupDetailsPage" class="page">
+    <div class="header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="closeGoldGroupDetails()"><span class="material-icons">arrow_back</span></button><h2 id="goldGroupDetailsTitle" style="margin:0; font-size:22px;">Label</h2></div>
+        <div style="background-color: rgba(234, 179, 8, 0.1); color: var(--gold); padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 16px; display:flex; align-items:center; gap:6px;"><span id="activeGroupGoldCount">0</span> <span class="material-icons" style="font-size:16px;">stars</span></div>
+    </div>
+    <div class="card" style="padding: 10px 16px; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted);">search</span><input id="goldAccountSearch" placeholder="Search accounts..." onkeyup="filterGoldAccounts()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>
+    <div style="display:flex; gap:10px; margin-bottom: 20px;"><button class="action-btn btn-gold" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="openGoldModifyMultiple()"><span class="material-icons">checklist</span> Select Range</button></div>
+    <div class="card" id="goldModifyMultipleCard" style="display:none; border: 2px solid var(--gold); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><h3 style="color:var(--gold); margin:0;"><span class="material-icons">stars</span> Bulk Status</h3><button class="menu-btn" onclick="closeGoldModifyMultiple()"><span class="material-icons">close</span></button></div>
+        <div class="stats-grid"><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">From</label><select id="goldModFrom"></select></div><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">To</label><select id="goldModTo"></select></div></div>
+        <div class="form-group"><label style="font-size:12px; color:var(--text-muted);">Status</label><select id="goldModStatus"><option value="true">Mark Gold</option><option value="false">Remove Gold</option></select></div>
+        <button class="save-btn btn-gold" style="display:flex; align-items:center; justify-content:center; gap:8px;" onclick="applyGoldModifyMultiple()"><span class="material-icons">check_circle</span> Apply</button>
+    </div>
+    <div id="goldGroupAccountsContainer" style="padding-bottom:30px;"></div>
+</div>
+
+<div id="levelGroupDetailsPage" class="page">
+    <div class="header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="closeLevelGroupDetails()"><span class="material-icons">arrow_back</span></button><h2 id="levelGroupDetailsTitle" style="margin:0; font-size:22px;">Label</h2></div>
+    </div>
+    <div class="card" style="padding: 10px 16px; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted);">search</span><input id="levelAccountSearch" placeholder="Search accounts..." onkeyup="filterLevelAccounts()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>
+    <div style="display:flex; gap:10px; margin-bottom: 20px;"><button class="action-btn btn-level" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="openLevelModifyMultiple()"><span class="material-icons">checklist</span> Select Range</button></div>
+    <div class="card" id="levelModifyMultipleCard" style="display:none; border: 2px solid var(--level); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><h3 style="color:var(--level); margin:0;"><span class="material-icons">tune</span> Bulk Level</h3><button class="menu-btn" onclick="closeLevelModifyMultiple()"><span class="material-icons">close</span></button></div>
+        <div class="stats-grid"><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">From</label><select id="levelModFrom"></select></div><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">To</label><select id="levelModTo"></select></div></div>
+        <div class="form-group"><label style="font-size:12px; color:var(--text-muted);">Status</label><select id="levelModStatus"><option value="Below 10 level">Below 10 level</option><option value="Level 10+">Level 10+</option><option value="Level 25+">Level 25+</option><option value="Level 30+">Level 30+</option></select></div>
+        <button class="save-btn btn-level" style="display:flex; align-items:center; justify-content:center; gap:8px;" onclick="applyLevelModifyMultiple()"><span class="material-icons">check_circle</span> Apply</button>
+    </div>
+    <div id="levelGroupAccountsContainer" style="padding-bottom:30px;"></div>
+</div>
+
+<div id="resellPage" class="page">  
+    <div class="header"><h1>Reseller Hub</h1></div>
+    <div class="card">  
+        <div class="form-group"><label>Customer Name</label><input id="resellCustomer" placeholder="Enter name"></div>  
+        <div class="stats-grid">
+            <div class="form-group"><label>Item</label><select id="resellItem"><option>Popularity</option><option>Home Votes</option></select></div>  
+            <div class="form-group"><label>Margin/M</label><select id="resellMargin" onchange="calculateResellProfit()"><option value="250">₹250</option><option value="200">₹200</option></select></div>  
+        </div>
+        <div class="stats-grid">
+            <div class="form-group"><label>Qty (K)</label><input type="number" id="resellQty" placeholder="0" oninput="calculateResellProfit()"></div>  
+            <div class="form-group"><label>Est. Profit</label><input id="resellProfit" readonly style="background-color:rgba(22, 163, 74, 0.1); color:var(--success); font-weight:bold; border-color:var(--success);"></div>  
+        </div>
+        <div class="form-group"><label>Status</label><select id="resellStatus"><option value="Paid">✅ Paid</option><option value="Pending">⏳ Pending</option></select></div>  
+        <button class="save-btn" onclick="saveResellOrder()" style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="material-icons">trending_up</span> Save Resell</button>  
+    </div>  
+    <h3 style="margin-top:24px;">Resell Pipeline</h3><div id="resellContainer"></div>  
+</div>  
+
+<div id="ledgerPage" class="page">  
+    <div class="header"><h1>Ledger Vault</h1></div>
+    <div class="card" style="padding: 10px 16px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted);">search</span><input id="ledgerSearch" placeholder="Search customer records..." onkeyup="renderLedger()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>  
+    <div id="ledgerContainer"></div>  
+</div>  
+
+<div id="customerOrdersPage" class="page">
+    <div class="header" style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('ledgerPage')"><span class="material-icons">arrow_back</span></button><h2 id="customerOrdersTitle" style="margin:0;">Orders</h2></div>
+    <div id="customerOrdersContainer" style="margin-top:20px;"></div>
+</div>
+
+<div class="bottom-nav">  
+    <button class="nav-btn active" data-target="homePage" onclick="navTo('homePage')"><span class="material-icons">dashboard</span>Dash</button>
+    <button class="nav-btn" data-target="ordersPage" onclick="navTo('ordersPage')"><span class="material-icons">add_shopping_cart</span>Orders</button>
+    <button class="nav-btn" data-target="resellPage" onclick="navTo('resellPage')"><span class="material-icons">storefront</span>Resell</button>
+    <button class="nav-btn" data-target="billingPage" onclick="navTo('billingPage')"><span class="material-icons">receipt_long</span>Billing</button>
+    <button class="nav-btn" data-target="stockPage" onclick="navTo('stockPage')"><span class="material-icons">inventory_2</span>Stock</button> 
+</div>  
+
+<div id="invoiceModal" class="invoice-modal">
+    <div class="invoice-modal-content">
+        <button class="close-modal-btn" onclick="closeInvoiceModal()"><span class="material-icons">close</span></button>
+        <div id="invoicePreviewContent" style="padding: 20px;"></div>
+    </div>
+</div>
+
+<script>  
+function formatStockValue(v) {
+    if (!v) return "0"; const a = Math.abs(v);
+    if (a >= 1000000) return (v / 1000000).toFixed(2).replace(/\.00$/, '').replace(/(\.[1-9])0$/, '$1') + 'M';
+    if (a >= 1000) return (v / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return v.toString();
+}
+
+function getDisplayLabel(raw) { return /\d/.test(raw) ? raw.replace(/\d+/g, '').replace(/\s+/g, ' ').trim() + " Series" : raw; }
+function generateSmartName(base, idx) {
+    const m = base.match(/^(.*?)(\d+)(.*)$/);
+    if(m) { const pre = m[1], num = m[2], suf = m[3]; return pre + String(parseInt(num) + idx - 1).padStart(num.length, '0') + suf; }
+    return base + " " + idx;
+}
+function parseAndIncrement(str, offset) {
+    if(!str) return str; const m = str.match(/^(.*?)(\d+)(.*)$/);
+    if(m) { return m[1] + String(parseInt(m[2]) + offset).padStart(m[2].length, '0') + m[3]; } return str; 
+}
+
+function toggleCard(contentId, iconId) {
+    const content = document.getElementById(contentId);
+    const icon = document.getElementById(iconId);
+    if (content.style.display === "none" || content.style.display === "") {
+        content.style.display = "block";
+        icon.style.transform = "rotate(180deg)";
+    } else {
+        content.style.display = "none";
+        icon.style.transform = "rotate(0deg)";
+    }
+}
+
+function syncAllVaults() {
+    renderPopLabels();
+    renderPopLabelCheckboxes();
+    renderHVLabels();
+    renderHVLabelCheckboxes();
+    renderGoldLabels();
+    renderLevelLabels();
+    updateRemainingStock();
+}
+
+let orders = JSON.parse(localStorage.getItem("des_orders") || "[]");  
+let stockEvents = JSON.parse(localStorage.getItem("des_stock_events") || "[]");  
+let invoices = JSON.parse(localStorage.getItem("des_invoices") || "[]");  
+let resellOrders = JSON.parse(localStorage.getItem("des_resell_orders") || "[]");  
+let popLabelGroups = JSON.parse(localStorage.getItem("des_pop_labels") || "[]");
+let hvLabelGroups = JSON.parse(localStorage.getItem("des_hv_labels") || "[]");
+let accLabelGroups = JSON.parse(localStorage.getItem("des_acc_labels") || "[]");
+
+let currentPopGroupIndex = null, currentHVGroupIndex = null, currentAccGroupIndex = null, currentGoldGroupIndex = null, currentLevelGroupIndex = null;
+
+function migrateOldLabels() {
+    let changed = false;
+    [popLabelGroups, hvLabelGroups, accLabelGroups].forEach((groups, idx) => {
+        groups.forEach(g => {
+            if (g.baseName && /\d/.test(g.baseName) && !g.label.includes("Series")) { g.label = getDisplayLabel(g.baseName); changed = true; } 
+            else if (!g.baseName && /\d/.test(g.label) && !g.label.includes("Series")) { g.baseName = g.label; g.label = getDisplayLabel(g.label); changed = true; }
+            g.accounts.forEach(acc => { if(!acc.level) { acc.level = "Below 10 level"; changed = true; } });
+        });
+        if (changed) {
+            if(idx === 0) localStorage.setItem("des_pop_labels", JSON.stringify(popLabelGroups));
+            if(idx === 1) localStorage.setItem("des_hv_labels", JSON.stringify(hvLabelGroups));
+            if(idx === 2) localStorage.setItem("des_acc_labels", JSON.stringify(accLabelGroups));
+        }
+    });
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode"); const isDark = document.body.classList.contains("dark-mode");
+    localStorage.setItem("des_dark_mode", isDark);
+    document.getElementById("darkModeIcon").innerText = isDark ? "light_mode" : "dark_mode";
+    document.getElementById("darkModeText").innerText = isDark ? "Disable Dark Mode" : "Enable Dark Mode";
+}
+  
+function showPage(pageId, pushToHistory = true) {  
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));  
+    const e = document.getElementById(pageId);  
+    if (e) {
+        e.style.animation = 'none'; e.offsetHeight; e.style.animation = null; e.classList.add("active"); window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (pageId === 'accountsManagerPage') { renderAccLabels(); renderLevelLabels(); }
+        if (pageId === 'stockPage') { renderPopLabelCheckboxes(); renderHVLabelCheckboxes(); }
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        const btn = document.querySelector(`.nav-btn[data-target="${pageId}"]`); if (btn) btn.classList.add("active");
+        if (pushToHistory) window.history.pushState({ pageId: pageId }, "", "#" + pageId);
+    }  
+}  
+
+function navTo(pageId) { showPage(pageId); }
+
+window.addEventListener('popstate', function(event) {
+    if (event.state && event.state.pageId) {
+        const p = event.state.pageId;
+        if (p === 'stockPage') {
+            currentPopGroupIndex = currentHVGroupIndex = currentGoldGroupIndex = currentLevelGroupIndex = null;
+            ["popAccountSearch", "hvAccountSearch", "goldAccountSearch", "levelAccountSearch"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
+            ["modifyMultipleCard", "hvModifyMultipleCard", "goldModifyMultipleCard", "levelModifyMultipleCard"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.display = "none"; });
+        } else if (p === 'accountsManagerPage') {
+            currentAccGroupIndex = currentLevelGroupIndex = null;
+            ["accSearch", "levelAccountSearch"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
+            ["accModifyMultipleCard", "levelModifyMultipleCard"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.display = "none"; });
+        } else if (p === 'popVaultPage') { currentPopGroupIndex = null;
+        } else if (p === 'hvVaultPage') { currentHVGroupIndex = null;
+        } else if (p === 'goldVaultPage') { currentGoldGroupIndex = null; }
+        showPage(p, false);
+    } else { showPage('homePage', false); }
+});
+
+function toggleFulfillmentFields() {
+    const m = document.getElementById("fulfillmentMethod").value;
+    document.getElementById("manualFulfillmentFields").style.display = m === "manual" ? "block" : "none";
+    document.getElementById("vaultFulfillmentFields").style.display = m === "vault" ? "block" : "none";
+}
+
+function loadVaultLabels() {
+    const item = document.getElementById("itemType").value, s = document.getElementById("vaultLabel"); if (!s) return; s.innerHTML = "";
+    let groups = item === "Popularity" ? popLabelGroups : hvLabelGroups;
+    if (groups.length === 0) { s.innerHTML = `<option value="">No Vaults Available</option>`; updateVaultAccounts(); return; }
+    groups.forEach((g, i) => s.innerHTML += `<option value="${i}">${g.label} (${g.accounts.length} accs)</option>`);
+    updateVaultAccounts();
+}
+
+function updateVaultAccounts() {
+    const item = document.getElementById("itemType").value, lIdx = document.getElementById("vaultLabel").value, fSel = document.getElementById("vaultFrom"), tSel = document.getElementById("vaultTo");
+    if (!fSel || !tSel) return; fSel.innerHTML = ""; tSel.innerHTML = ""; if (lIdx === "") { calculateVaultQty(); return; }
+    let groups = item === "Popularity" ? popLabelGroups : hvLabelGroups; const g = groups[lIdx]; if (!g) return;
+    g.accounts.forEach((acc, i) => { fSel.innerHTML += `<option value="${i}">${acc.name}</option>`; tSel.innerHTML += `<option value="${i}">${acc.name}</option>`; });
+    calculateVaultQty();
+}
+
+function toggleVaultCustom() { document.getElementById("vaultCustomDiv").style.display = document.getElementById("vaultAmount").value === "custom" ? "block" : "none"; calculateVaultQty(); }
+
+function calculateVaultQty() {
+    const f = parseInt(document.getElementById("vaultFrom").value), t = parseInt(document.getElementById("vaultTo").value), amtSel = document.getElementById("vaultAmount").value;
+    let perAcc = amtSel === "custom" ? Number(document.getElementById("vaultCustomAmount").value || 0) : Number(amtSel);
+    if (!isNaN(f) && !isNaN(t) && perAcc > 0) { let count = Math.abs(t - f) + 1; document.getElementById("vaultCalculatedQty").innerText = `Total Deduction: ${count * perAcc}K`; } 
+    else { document.getElementById("vaultCalculatedQty").innerText = `Total Deduction: 0K`; }
+}
+
+function toggleItemFields(){  
+    const item = document.getElementById("itemType").value;  
+    if (item === "UC"){  
+        document.getElementById("stockItemFields").style.display = "none"; document.getElementById("ucFields").style.display = "block";  
+    } else {  
+        document.getElementById("stockItemFields").style.display = "block"; document.getElementById("ucFields").style.display = "none";  
+        const amtSel = document.getElementById("vaultAmount"); amtSel.innerHTML = "";
+        if (item === "Popularity") amtSel.innerHTML = '<option value="15">15K</option><option value="24">24K</option><option value="custom">Custom</option>';
+        else amtSel.innerHTML = '<option value="20">20K</option><option value="custom">Custom</option>';
+        loadVaultLabels(); toggleVaultCustom();
+    }  
+}  
+  
+function generateOrderId(){ return "DES-" + String(orders.length + 1).padStart(6,"0"); }  
+
+function calculateAmount(){  
+    const item = document.getElementById("itemType").value;  
+    if(item === "UC") return Number(document.getElementById("ucAmount").value || 0);  
+    const method = document.getElementById("fulfillmentMethod").value, rate = Number(document.getElementById("rate").value || 0);
+    if (method === "manual") { const qty = Number(document.getElementById("manualQuantity").value || 0), unit = document.getElementById("manualUnit").value; return unit === "M" ? qty * 1000 * rate : qty * rate; } 
+    else {
+        const f = parseInt(document.getElementById("vaultFrom").value), t = parseInt(document.getElementById("vaultTo").value), amtSel = document.getElementById("vaultAmount").value;
+        let perAcc = amtSel === "custom" ? Number(document.getElementById("vaultCustomAmount").value || 0) : Number(amtSel);
+        if (!isNaN(f) && !isNaN(t) && perAcc > 0) return (Math.abs(t - f) + 1) * perAcc * rate; return 0;
+    }
+}  
+  
+function saveOrder() {  
+    const item = document.getElementById("itemType").value; 
+    let order = window.editingOrderId ? orders.find(o => o.id === window.editingOrderId) : { id: generateOrderId() };  
+    order.customer = document.getElementById("customerName").value; 
+    order.item = item; 
+    order.status = document.getElementById("paymentStatus").value; 
+    order.date = new Date().toLocaleString(); 
+    
+    let qtyK = 0, deducted = false, vaultDetails = ""; 
+    const rate = Number(document.getElementById("rate").value || 0);
+
+    if (item !== "UC") {
+        const method = document.getElementById("fulfillmentMethod").value;
+        if (method === "manual") {
+            const mq = Number(document.getElementById("manualQuantity").value || 0), mu = document.getElementById("manualUnit").value;
+            qtyK = mu === "M" ? mq * 1000 : mq; 
+            order.details = mq + mu + " @ ₹" + rate + "/K";
+        } else {
+            const lIdx = document.getElementById("vaultLabel").value, fIdx = parseInt(document.getElementById("vaultFrom").value), tIdx = parseInt(document.getElementById("vaultTo").value), amtSel = document.getElementById("vaultAmount").value;
+            let perAcc = amtSel === "custom" ? Number(document.getElementById("vaultCustomAmount").value || 0) : Number(amtSel);
+            
+            if (lIdx !== "" && !isNaN(fIdx) && !isNaN(tIdx) && perAcc > 0) {
+                let s = Math.min(fIdx, tIdx), e = Math.max(fIdx, tIdx), accCount = (e - s) + 1; 
+                qtyK = accCount * perAcc; 
+                
+                if (item === "Popularity") {
+                    const g = popLabelGroups[lIdx];
+                    let dedPop = perAcc * 1000;
+                    for(let i = s; i <= e; i++) {
+                        if ((g.accounts[i].pop || 0) < dedPop) {
+                            alert(`Insufficient stock! ${g.accounts[i].name} only has ${formatStockValue(g.accounts[i].pop || 0)} Pop.`);
+                            return;
+                        }
+                    }
+                } else if (item === "Home Votes") {
+                    const g = hvLabelGroups[lIdx];
+                    let dedHV = perAcc * 1000;
+                    for(let i = s; i <= e; i++) {
+                        if ((g.accounts[i].hv || 0) < dedHV) {
+                            alert(`Insufficient stock! ${g.accounts[i].name} only has ${formatStockValue(g.accounts[i].hv || 0)} HV.`);
+                            return;
+                        }
+                    }
+                }
+
+                order.details = qtyK + "K @ ₹" + rate + "/K"; 
+                deducted = true;
+                
+                if (item === "Popularity") {
+                    const g = popLabelGroups[lIdx];
+                    let dedPop = perAcc * 1000;
+                    for(let i = s; i <= e; i++) { 
+                        let a = g.accounts[i]; 
+                        if(!a.counts) a.counts = { "1500": '', "600": '', "400": '', "200": '' }; 
+                        
+                        a.pop = Math.max(0, (a.pop || 0) - dedPop); 
+                        
+                        let remainingToDeduct = dedPop;
+                        const popItems = [ {k:"1500", v:1500}, {k:"600", v:600}, {k:"400", v:400}, {k:"200", v:200} ];
+                        for (let pItem of popItems) {
+                            let cVal = Number(a.counts[pItem.k]) || 0;
+                            if (cVal > 0 && remainingToDeduct >= pItem.v) {
+                                let take = Math.min(cVal, Math.floor(remainingToDeduct / pItem.v));
+                                a.counts[pItem.k] = cVal - take === 0 ? '' : cVal - take;
+                                remainingToDeduct -= (take * pItem.v);
+                            }
+                        }
+                    }
+                    g.total = g.accounts.reduce((sum, a) => sum + (a.pop || 0), 0); 
+                    savePopLabels(); 
+                    vaultDetails = ` (Vault: ${g.label} | ${accCount} Accs x ${perAcc}K)`;
+                } else if (item === "Home Votes") {
+                    const g = hvLabelGroups[lIdx]; 
+                    let dedHV = perAcc * 1000;
+                    for(let i = s; i <= e; i++) { 
+                        let a = g.accounts[i]; 
+                        a.hv = Math.max(0, (a.hv || 0) - dedHV); 
+                        a.cards = Math.floor(a.hv / 100); 
+                    }
+                    g.total = g.accounts.reduce((sum, a) => sum + (a.hv || 0), 0); 
+                    saveHVLabels(); 
+                    vaultDetails = ` (Vault: ${g.label} | ${accCount} Accs x ${perAcc}K)`;
+                }
+            } else { alert("Select valid vault parameters."); return; }
+        }
+    } else { order.details = document.getElementById("ucPack").value; }
+
+    order.amount = calculateAmount();
+
+    if(!window.editingOrderId) {  
+        orders.push(order);  
+        if (order.item === "Popularity") { stockEvents.push({ type: "Popularity Sold", event: "Order " + order.id + vaultDetails, totalPop: -qtyK, vaultSynced: deducted }); }  
+        if (order.item === "Home Votes") { stockEvents.push({ type: "Home Votes Sold", event: "Order " + order.id + vaultDetails, totalHV: -qtyK, vaultSynced: deducted }); }  
+        localStorage.setItem("des_stock_events", JSON.stringify(stockEvents));  
+    }  
+    localStorage.setItem("des_orders", JSON.stringify(orders)); 
+    window.editingOrderId = null; 
+    document.getElementById("saveOrderBtn").innerHTML = `<span class="material-icons">save</span> Save Order`;  
+    
+    clearForm(); renderOrders(); updateDashboard(); loadInvoiceOrders(); renderMultiOrders(); updateRemainingStock(); renderLedger(); navTo('homePage');
+} 
+  
+function clearForm(){  
+    ["customerName", "manualQuantity", "rate", "ucAmount", "vaultCustomAmount"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value=""; });  
+    document.getElementById("fulfillmentMethod").value = "manual"; toggleFulfillmentFields();
+}  
+  
+function renderOrders(){  
+    const c = document.getElementById("ordersContainer"); c.innerHTML = "";  
+    [...orders].reverse().forEach(o=>{  
+        const badge = o.status === "Paid" ? "var(--success)" : "var(--warning)", badgeBg = o.status === "Paid" ? "rgba(22, 163, 74, 0.1)" : "rgba(245, 158, 11, 0.1)";  
+        c.innerHTML += `<div class="order-card"><div class="order-actions"><button class="menu-btn" onclick="toggleMenu('${o.id}')"><span class="material-icons">more_vert</span></button><div id="menu-${o.id}" class="dropdown"><button onclick="editOrder('${o.id}')" style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px;">edit</span> Edit</button><button onclick="deleteOrder('${o.id}')" style="display:flex; align-items:center; gap:8px; color:var(--danger);"><span class="material-icons" style="font-size:18px;">delete</span> Delete</button></div></div><div class="order-id">${o.id}</div><div style="margin-top:10px; font-size:16px;"><b>${o.customer}</b></div><div style="color:var(--text-muted); font-size:14px; margin-top:4px;">${o.item} &bull; ${o.details}</div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; border-top:1px solid var(--border); padding-top:12px;"><div style="font-size:18px; font-weight:800;">₹${o.amount.toLocaleString()}</div><div style="background-color:${badgeBg}; color:${badge}; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:700;">${o.status}</div></div></div>`;  
+    });  
+    renderRecentOrders();  
+}  
+  
+function renderRecentOrders(){  
+    const r = document.getElementById("recentOrders"); r.innerHTML = "";  
+    [...orders].reverse().slice(0,5).forEach(o=>{  
+        const badge = o.status === "Paid" ? "var(--success)" : "var(--warning)";  
+        r.innerHTML += `<div class="order-card" style="cursor: pointer; transition: background-color 0.3s ease;" onclick="toggleRecentOrderDetails('${o.id}')"><div style="display:flex; justify-content:space-between; align-items:center;"><div><div style="font-weight:700;">${o.customer}</div><div style="font-size:12px; color:var(--text-muted); margin-top:4px;">${o.item}</div></div><div style="text-align:right;"><div style="font-weight:800;">₹${o.amount.toLocaleString()}</div><div style="font-size:10px; color:${badge}; font-weight:bold; margin-top:4px; text-transform:uppercase;">${o.status}</div></div></div><div id="recent-details-${o.id}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-muted); animation: fadeInDrop 0.2s ease forwards;"><div style="margin-bottom: 6px;"><b>Order ID:</b> <span style="color:var(--text-color);">${o.id}</span></div><div style="margin-bottom: 6px;"><b>Date:</b> <span style="color:var(--text-color);">${o.date}</span></div><div><b>Specs:</b> <span style="color:var(--text-color);">${o.details}</span></div></div></div>`;  
+    });  
+}
+
+function toggleRecentOrderDetails(id) { const d = document.getElementById('recent-details-' + id); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
+  
+function updateDashboard(){  
+    let profit = 0, paid = 0, pending = 0;  
+    orders.forEach(o=>{ if(o.status === "Paid"){ profit += Number(o.amount); paid++; } else { pending++; } });  
+    resellOrders.forEach(o=>{ if(o.status === "Paid"){ profit += Number(o.profit); } });  
+    document.getElementById("profitAmount").innerText = "₹" + profit.toLocaleString(); document.getElementById("totalOrders").innerText = orders.length; document.getElementById("paidOrders").innerText = paid; document.getElementById("pendingOrders").innerText = pending;  
+}  
+  
+function downloadInvoice(){  
+    const el = document.getElementById("printInvoice"); if(!el){ alert("Generate invoice first"); return; }  
+    const nw = window.open("","_blank"); nw.document.write(`<html><head><title>Invoice</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>body{font-family:'Inter', sans-serif; padding:20px; background-color:#f1f5f9;}</style></head><body><div style="max-width:700px; margin:auto;">${el.outerHTML}</div></body></html>`);  
+    nw.document.close(); setTimeout(() => nw.print(), 500);
+}  
+  
+function generateInvoiceId(){ return "INV-" + String(invoices.length+1).padStart(6,"0"); }  
+function loadInvoiceOrders(){ const s=document.getElementById("invoiceOrder"); if(!s) return; s.innerHTML=""; orders.forEach(o=>{ s.innerHTML += `<option value="${o.id}">${o.id} - ${o.customer}</option>`; }); }  
+  
+function generateInvoice(){  
+    const id=document.getElementById("invoiceOrder").value, order=orders.find(o=>o.id===id); if(!order) return;  
+    const paidAmt = Number(document.getElementById("autoInvoicePaid").value || 0);
+    const inv={ invoiceId:generateInvoiceId(), customer:order.customer, item:order.item, details:order.details, amount:order.amount, paid: paidAmt, date:new Date().toLocaleString() };  
+    invoices.push(inv); localStorage.setItem("des_invoices",JSON.stringify(invoices)); 
+    document.getElementById("autoInvoicePaid").value = "";
+    showInvoice(inv); renderInvoiceHistory();  
+}  
+
+function addBillRow() {
+    const div = document.createElement("div"); div.className = "card"; div.style.padding = "15px";
+    div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><label style="margin:0; font-size:12px; color:var(--text-muted); text-transform:uppercase;">Line Item</label><button class="menu-btn" style="width:24px; height:24px;" onclick="this.parentElement.parentElement.remove()"><span class="material-icons" style="font-size:18px; color:var(--danger);">close</span></button></div><select class="billItemType" onchange="toggleBillFields(this)" style="margin-bottom:10px;"><option>Popularity</option><option>Home Votes</option><option>UC</option></select><div class="billNormalFields stats-grid"><input class="billQty" type="number" placeholder="Qty"><input class="billRate" type="number" placeholder="Rate/K"></div><div class="billUcFields stats-grid" style="display:none;"><select class="billUcPack"><option value="60">60 UC</option><option value="325">325 UC</option><option value="660">660 UC</option><option value="1800">1800 UC</option><option value="3850">3850 UC</option><option value="7500">7500 UC</option></select><input class="billUcAmount" type="number" placeholder="Amt"></div>`;
+    document.getElementById("billItemsContainer").appendChild(div);
+}
+
+function toggleBillFields(sel) { const c = sel.parentElement; c.querySelector(".billNormalFields").style.display = sel.value === "UC" ? "none" : "grid"; c.querySelector(".billUcFields").style.display = sel.value === "UC" ? "grid" : "none"; }
+
+function createCustomBill() {
+    const cus = document.getElementById("billCustomer").value; let tot = 0, det = "";
+    document.querySelectorAll("#billItemsContainer .card").forEach(c => {
+        const it = c.querySelector(".billItemType").value;
+        if (it === "UC") {
+            const pk = c.querySelector(".billUcPack").value, am = Number(c.querySelector(".billUcAmount").value || 0); tot += am;
+            det += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;"><span><b style="color:#0f172a; font-size:15px;">UC Top-Up</b><br><span style="color:#64748b; font-size:14px;">${pk} UC</span></span><b style="font-size:16px;">₹${am.toLocaleString()}</b></div>`;
+        } else {
+            const qt = Number(c.querySelector(".billQty").value || 0), rt = Number(c.querySelector(".billRate").value || 0), am = qt * rt; tot += am;
+            det += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;"><span><b style="color:#0f172a; font-size:15px;">${it}</b><br><span style="color:#64748b; font-size:14px;">${qt}K @ ₹${rt}/K</span></span><b style="font-size:16px;">₹${am.toLocaleString()}</b></div>`;
+        }
+    });
+    const paidAmt = Number(document.getElementById("customInvoicePaid").value || 0);
+    const inv = { invoiceId: generateInvoiceId(), customer: cus, item: "Custom Multi Bill", details: det, amount: tot, paid: paidAmt, date: new Date().toLocaleString() };
+    invoices.push(inv); localStorage.setItem("des_invoices", JSON.stringify(invoices));
+    document.getElementById("billCustomer").value = ""; document.getElementById("customInvoicePaid").value = ""; document.getElementById("billItemsContainer").innerHTML = ""; addBillRow(); 
+    showInvoice(inv); renderInvoiceHistory();
+}
+  
+function showInvoice(inv){  
+    let det = inv.details.includes("<div") ? inv.details : `<div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;"><span><b style="color:#0f172a; font-size:15px;">${inv.item}</b><br><span style="color:#64748b; font-size:14px;">${inv.details}</span></span><b style="font-size:16px; color:#0f172a;">₹${inv.amount.toLocaleString()}</b></div>`;
+    
+    const paid = Number(inv.paid || 0);
+    const due = Math.max(0, inv.amount - paid);
+
+    let summaryHtml = `
+        <div style="background-color: #fafafa; border-top: 2px solid #000000; border-bottom: 2px solid #000000; padding: 15px 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="font-size: 13px; font-weight: 700; color: #64748b; text-transform:uppercase;">Subtotal</div>
+                <div style="font-size: 15px; font-weight: 800; color: #000000;">₹${inv.amount.toLocaleString()}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #cbd5e1;">
+                <div style="font-size: 13px; font-weight: 700; color: #10b981; text-transform:uppercase;">Amount Paid</div>
+                <div style="font-size: 15px; font-weight: 800; color: #10b981;">- ₹${paid.toLocaleString()}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 15px; font-weight: 900; color: #000000; text-transform:uppercase;">Balance Due</div>
+                <div style="font-size: 24px; font-weight: 900; color: ${due > 0 ? '#ef4444' : '#10b981'};">₹${due.toLocaleString()}</div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById("invoicePreviewContent").innerHTML=`  
+        <div id="printInvoice" style="background-color:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08); border:1px solid #e2e8f0; position:relative; font-family:'Inter', Arial, sans-serif;">  
+            <div style="background-color: #000000; color: white; padding: 25px 20px; text-align: center;"><h2 style="margin: 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase; font-weight:900;">Dictator E-Store</h2><div style="font-size: 11px; color:#a1a1aa; margin-top: 6px; font-weight:600; letter-spacing: 3px; text-transform:uppercase;">OFFICIAL INVOICE</div></div>
+            <div style="padding: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;"><div><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; font-weight:700;">Billed To</div><div style="font-size: 18px; font-weight: 900; color: #000000;">${inv.customer}</div></div><div style="text-align: right;"><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; font-weight:700;">Invoice No</div><div style="font-weight: 800; color: #000000; font-size: 14px; margin-bottom: 8px;">${inv.invoiceId}</div><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; font-weight:700;">Date</div><div style="font-weight: 700; color: #000000; font-size: 12px;">${inv.date.split(',')[0]}</div></div></div>
+                <div style="margin-bottom: 20px;"><div style="display: flex; justify-content: space-between; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #000000; padding-bottom: 8px; margin-bottom: 15px; font-weight:800;"><div>Item Description</div><div>Amount</div></div><div style="color: #0f172a; line-height: 1.6;">${det}</div></div>
+                ${summaryHtml}
+                <div style="text-align:center; margin-top:25px; font-size:11px; color:#94a3b8; font-weight:600;">Thank you for your business!</div>
+            </div>
+        </div>
+        <button class="save-btn btn-black" style="margin-top:20px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="downloadInvoice()"><span class="material-icons">print</span> View / Print</button>`;  
+    
+    document.getElementById("invoiceModal").classList.add("show");
+}  
+
+function closeInvoiceModal() {
+    document.getElementById("invoiceModal").classList.remove("show");
+}
+  
+function renderMultiOrders(){  
+    const b=document.getElementById("multiOrderList"); if(!b) return; b.innerHTML="";  
+    orders.forEach(o=>{ b.innerHTML += `<label style="display:flex; align-items:center; gap:12px; padding:14px; background-color:var(--bg-color); border-radius:12px; margin-bottom:8px; cursor:pointer; border:1px solid var(--border);"><input type="checkbox" class="multiOrder" value="${o.id}" style="width:20px; height:20px; margin:0; accent-color:var(--secondary);"><div style="flex:1;"><div style="font-weight:700; font-size:15px;">${o.customer}</div><div style="font-size:13px; color:var(--text-muted); margin-top:2px;">${o.id} &bull; ${o.item}</div></div><div style="font-weight:800; color:var(--text-color); font-size:16px;">₹${o.amount.toLocaleString()}</div></label>`; });  
+}  
+  
+function generateCombinedInvoice(){  
+    const sel=[...document.querySelectorAll(".multiOrder:checked")].map(x=>x.value); if(sel.length===0){ alert("Select orders"); return; }  
+    let tot=0, det="";  
+    sel.forEach(id=>{ const o=orders.find(x=>x.id===id); if(o){ tot += Number(o.amount); det += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;"><span><b style="color:#0f172a; font-size:15px;">${o.item}</b><br><span style="color:#64748b; font-size:14px;">${o.id}</span></span><b style="font-size:16px;">₹${o.amount.toLocaleString()}</b></div>`; } });  
+    const paidAmt = Number(document.getElementById("multiInvoicePaid").value || 0);
+    const inv={ invoiceId:"INV-"+String(invoices.length+1).padStart(6,"0"), customer:"Combined Accounts", item:"Combined Invoice", details:det, amount:tot, paid: paidAmt, date:new Date().toLocaleString() };  
+    invoices.push(inv); localStorage.setItem("des_invoices",JSON.stringify(invoices)); 
+    document.getElementById("multiInvoicePaid").value = "";
+    showInvoice(inv); renderInvoiceHistory(); document.querySelectorAll(".multiOrder:checked").forEach(cb => cb.checked = false);
+}  
+
+function deleteSingleInvoice(id){ if(confirm("Delete this invoice?")){ invoices = invoices.filter(i => i.invoiceId !== id); localStorage.setItem("des_invoices", JSON.stringify(invoices)); renderInvoiceHistory(); } }
+  
+function renderInvoiceHistory(){  
+    const c = document.getElementById("invoiceHistory"); if(!c) return; c.innerHTML = "";  
+    [...invoices].reverse().forEach(i=>{  
+        c.innerHTML += `<div class="order-card" style="display:flex; flex-direction:column; gap:12px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><div class="order-id" style="color:var(--text-color); background-color:var(--bg-color); border:1px solid var(--border);">${i.invoiceId}</div><div style="font-weight:800; font-size:16px; margin-top:8px;">${i.customer}</div><div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${i.date.split(',')[0]}</div></div><div style="text-align:right;"><div style="font-weight:900; font-size:20px;">₹${i.amount.toLocaleString()}</div><button class="menu-btn" style="margin-top:8px; display:inline-flex; float:right;" onclick="deleteSingleInvoice('${i.invoiceId}')"><span class="material-icons" style="color:var(--danger); font-size:20px;">delete</span></button></div></div><div style="margin-top:10px;"><button class="action-btn btn-dark" style="width:100%; padding:12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size:13px;" onclick="viewInvoice('${i.invoiceId}')"><span class="material-icons" style="font-size:18px;">visibility</span> View</button></div></div>`;  
+    });  
+}  
+
+function viewInvoice(id){ const inv = invoices.find(i=>i.invoiceId===id); if(!inv) return; showInvoice(inv); }
+function deleteAllInvoices(){ if(confirm("Delete all invoices?")){ invoices = []; localStorage.setItem("des_invoices",JSON.stringify(invoices)); renderInvoiceHistory(); } }  
+function toggleMenu(id){ document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("show")); document.getElementById("menu-"+id).classList.toggle("show"); }  
+function deleteOrder(id){ if(confirm("Delete order?")){ orders = orders.filter(o=>o.id!==id); localStorage.setItem("des_orders",JSON.stringify(orders)); renderOrders(); updateDashboard(); loadInvoiceOrders(); renderMultiOrders(); renderLedger(); } }  
+  
+function editOrder(id){  
+    const o = orders.find(x => x.id === id); if(!o) return;  
+    document.getElementById("customerName").value = o.customer; document.getElementById("paymentStatus").value = o.status; document.getElementById("itemType").value = o.item;  
+    
+    document.getElementById("itemType").dispatchEvent(new Event('change'));
+    
+    if(o.item === "UC"){ 
+        document.getElementById("ucPack").value = o.details; document.getElementById("ucAmount").value = o.amount; 
+    } else { 
+        document.getElementById("fulfillmentMethod").value = "manual"; toggleFulfillmentFields();
+        const p = o.details.split(" "); document.getElementById("manualQuantity").value = parseFloat(p[0]); document.getElementById("manualUnit").value = p[0].includes("M") ? "M" : "K"; document.getElementById("rate").value = p[2].replace("₹","").replace("/K",""); 
+    }  
+    window.editingOrderId = id; document.getElementById("saveOrderBtn").innerHTML = `<span class="material-icons">update</span> Update Order`; navTo("ordersPage");  
+}  
+
+function toggleStockDestination() {
+    const dest = document.getElementById("stockDestination").value;
+    const isInternal = dest === "internal";
+    
+    document.getElementById("eventNameLabel").innerText = isInternal ? "Event Name" : "Source";
+    document.getElementById("eventName").placeholder = isInternal ? "Summer Event" : "E.g. Vendor, Giveaway...";
+
+    if(document.getElementById("popTargetLabelsGroup")) document.getElementById("popTargetLabelsGroup").style.display = isInternal ? "block" : "none";
+    if(document.getElementById("popInternalRateGroup")) document.getElementById("popInternalRateGroup").style.display = isInternal ? "grid" : "none";
+    if(document.getElementById("popExternalQtyGroup")) document.getElementById("popExternalQtyGroup").style.display = isInternal ? "none" : "block";
+
+    if(document.getElementById("hvTargetLabelsGroup")) document.getElementById("hvTargetLabelsGroup").style.display = isInternal ? "block" : "none";
+    if(document.getElementById("hvInternalQtyGroup")) document.getElementById("hvInternalQtyGroup").style.display = isInternal ? "block" : "none";
+    if(document.getElementById("hvExternalQtyGroup")) document.getElementById("hvExternalQtyGroup").style.display = isInternal ? "none" : "block";
+}
+  
+function toggleStockType(){  
+    const t = document.getElementById("stockType").value;  
+    ["popFields", "hvFields", "heliFields"].forEach(id => document.getElementById(id).style.display = "none");
+    document.getElementById("stockDestinationGroup").style.display = t === "Helicopters" ? "none" : "block";
+    
+    // Hide the unified event name group entirely if it's Home Votes or Helicopters
+    document.getElementById("unifiedEventNameGroup").style.display = t === "Popularity" ? "block" : "none";
+
+    if(t === "Popularity") document.getElementById("popFields").style.display = "block";  
+    else if(t === "Home Votes") document.getElementById("hvFields").style.display = "block";  
+    else if(t === "Helicopters") document.getElementById("heliFields").style.display = "block";  
+    
+    toggleStockDestination();
+}  
+  
+function toggleCustomPopRate() { document.getElementById("popPerAccCustomDiv").style.display = document.getElementById("popPerAccSelect").value === "custom" ? "block" : "none"; }
+
+function renderPopLabelCheckboxes() {
+    const c = document.getElementById("popLabelSelectContainer"); if (!c) return; c.innerHTML = "";
+    if (popLabelGroups.length === 0) { c.innerHTML = `<div style="font-size:12px; color:var(--text-muted); text-align:center;">No labels available</div>`; return; }
+    popLabelGroups.forEach((g, i) => { c.innerHTML += `<label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer;"><input type="checkbox" class="popLabelCheckbox" value="${i}" style="width:16px; height:16px; margin:0; accent-color:var(--primary);">${g.label} <span style="font-size:11px; color:var(--text-muted);">(${g.accounts.length} accs)</span></label>`; });
+}
+
+function renderHVLabelCheckboxes() {
+    const c = document.getElementById("hvLabelSelectContainer"); if (!c) return; c.innerHTML = "";
+    if (hvLabelGroups.length === 0) { c.innerHTML = `<div style="font-size:12px; color:var(--text-muted); text-align:center;">No labels available</div>`; return; }
+    hvLabelGroups.forEach((g, i) => { c.innerHTML += `<label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer;"><input type="checkbox" class="hvLabelCheckbox" value="${i}" style="width:16px; height:16px; margin:0; accent-color:var(--success);">${g.label} <span style="font-size:11px; color:var(--text-muted);">(${g.accounts.length} accs)</span></label>`; });
+}
+
+function saveStockEvent(){  
+    const t = document.getElementById("stockType").value;  
+    const dest = t !== "Helicopters" ? document.getElementById("stockDestination").value : "internal";
+
+    if (t === "Popularity") {  
+        const ev = document.getElementById("eventName").value;
+        if (dest === "external") {
+            const extQty = Number(document.getElementById("popExternalQty").value || 0);
+            if (!ev || !extQty) { alert("Fill all fields."); return; }
+            stockEvents.push({ type: "Popularity", event: ev + " (External)", totalPop: extQty, injectedToLabels: false, vaultSynced: false });
+            document.getElementById("eventName").value = ""; document.getElementById("popExternalQty").value = "";
+        } else {
+            const rSel = document.getElementById("popPerAccSelect").value;
+            let popPer = rSel === "custom" ? Number(document.getElementById("popPerAccCustom").value || 0) : Number(rSel);
+            const sel = Array.from(document.querySelectorAll('.popLabelCheckbox:checked')).map(cb => Number(cb.value));
+            if (!ev || !popPer || sel.length === 0) { alert("Fill all fields and select labels."); return; }
+            let aCnt = 0;
+            sel.forEach(gi => {
+                const g = popLabelGroups[gi];
+                g.accounts.forEach(a => {
+                    aCnt++; if (!a.counts) a.counts = { "1500": '', "600": '', "400": '', "200": '' };
+                    
+                    let injectAmt = popPer * 1000;
+                    a.pop = (a.pop || 0) + injectAmt;
+
+                    if (rSel === "15") {
+                        a.counts["1500"] = (Number(a.counts["1500"]) || 0) + 10;
+                    } else if (rSel === "24") {
+                        a.counts["600"] = (Number(a.counts["600"]) || 0) + 40;
+                    } else {
+                        let rem = injectAmt;
+                        const items = [{k:"1500",v:1500}, {k:"600",v:600}, {k:"400",v:400}, {k:"200",v:200}];
+                        for (let pItem of items) {
+                            let addCount = Math.floor(rem / pItem.v);
+                            if (addCount > 0) {
+                                a.counts[pItem.k] = (Number(a.counts[pItem.k]) || 0) + addCount;
+                                rem -= addCount * pItem.v;
+                            }
+                        }
+                    }
+                });
+                g.total = g.accounts.reduce((sum, a) => sum + (a.pop || 0), 0);
+            });
+            savePopLabels(); 
+            stockEvents.push({ type: "Popularity", event: ev, popPerAcc: popPer, accCount: aCnt, totalPop: popPer * aCnt, injectedToLabels: true });  
+            document.getElementById("eventName").value = ""; document.getElementById("popPerAccCustom").value = ""; document.querySelectorAll('.popLabelCheckbox:checked').forEach(cb => cb.checked = false);
+        }
+    } else if (t === "Home Votes") {  
+        let ev = document.getElementById("eventName").value;
+        if(!ev) ev = "HV Fill";
+
+        if (dest === "external") {
+            const extCards = Number(document.getElementById("hvExternalQty").value || 0);
+            if (!extCards) { alert("Fill quantity."); return; }
+            const tHV = (extCards * 100) / 1000; 
+            stockEvents.push({ type: "Home Votes", event: ev + " (External)", totalHV: tHV, injectedToLabels: false, vaultSynced: false });
+            document.getElementById("hvExternalQty").value = "";
+            document.getElementById("eventName").value = "";
+        } else {
+            const q = Number(document.getElementById("hvPerAcc").value || 0), sel = Array.from(document.querySelectorAll('.hvLabelCheckbox:checked')).map(cb => Number(cb.value));
+            if (!q || sel.length === 0) { alert("Fill all fields and select labels."); return; }  
+            let aCnt = 0;
+            sel.forEach(gi => {
+                const g = hvLabelGroups[gi];
+                g.accounts.forEach(a => { aCnt++; const e = Number(a.cards) || 0; a.cards = e + q; a.hv = (e + q) * 100; });
+                g.total = g.accounts.reduce((sum, a) => sum + (a.hv || 0), 0);
+            });
+            saveHVLabels(); const tPerAcc = q * 100; 
+            stockEvents.push({ type: "Home Votes", event: ev, popPerAcc: tPerAcc / 1000, accCount: aCnt, totalHV: (tPerAcc * aCnt) / 1000, injectedToLabels: true });  
+            document.getElementById("hvPerAcc").value = ""; document.getElementById("eventName").value = ""; document.querySelectorAll('.hvLabelCheckbox:checked').forEach(cb => cb.checked = false);
+        }
+    } else if (t === "Helicopters") {  
+        const idN = document.getElementById("heliIdName").value, hCnt = Number(document.getElementById("heliCount").value || 0);  
+        if (!idN || !hCnt) { alert("Fill all fields"); return; }  
+        stockEvents.push({ type:"Helicopters", event:idN, idName:idN, heliCount:hCnt });  
+        document.getElementById("heliIdName").value = ""; document.getElementById("heliCount").value = "";
+        renderHeliManager();
+    }  
+    localStorage.setItem("des_stock_events", JSON.stringify(stockEvents)); renderStockEvents(); updateRemainingStock();  
+}
+  
+function renderStockEvents(){  
+    const c = document.getElementById("stockEvents"); if(!c) return; c.innerHTML = "";  
+    [...stockEvents].reverse().forEach((item, oI)=>{  
+        const i = stockEvents.length - 1 - oI;
+        let sHtml = "", clr = "var(--primary)", bg = "rgba(37, 99, 235, 0.1)";
+        let badge = item.injectedToLabels ? `<span style="font-size:10px; color:var(--success); background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; margin-left:8px; vertical-align:middle;">INJECTED</span>` : (item.vaultSynced ? `<span style="font-size:10px; color:var(--primary); background:rgba(37, 99, 235, 0.1); padding:2px 6px; border-radius:4px; margin-left:8px; vertical-align:middle;">DEDUCTED</span>` : "");
+        
+        if (item.type === "Helicopters") {
+            clr = "var(--warning)"; bg = "rgba(245, 158, 11, 0.1)";
+            sHtml = `<div style="font-size:12px; color:var(--text-muted);">Account ID</div><div style="font-size:18px; font-weight:800; margin-bottom:10px;">${item.idName || item.event}</div><div style="display:flex; justify-content:space-between; align-items:center; background-color:var(--bg-color); padding:12px; border-radius:10px;"><span style="font-weight:600;">Helicopters</span><b style="color:var(--warning); font-size:20px;">${item.heliCount}</b></div>`;
+        } else {
+            if(item.type.includes("Home Votes")) { clr = "var(--success)"; bg = "rgba(22, 163, 74, 0.1)"; }
+            const cnt = item.accCount || 0, tv = item.type.includes("Home Votes") ? (item.totalHV || 0) : (item.totalPop || 0);  
+            sHtml = `
+                ${cnt > 0 ? `<div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:15px;"><span style="color:var(--text-muted);">Rate / Acc:</span> <b>${formatStockValue((item.popPerAcc || 0) * 1000)}</b></div><div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:15px;"><span style="color:var(--text-muted);">Accounts:</span> <b>${cnt}</b></div>` : ''}
+                <div style="display:flex; justify-content:space-between; align-items:center; background-color:var(--bg-color); padding:12px; border-radius:10px;"><span style="font-weight:600;">Total Volume</span><b style="color:${clr}; font-size:18px;">${formatStockValue(tv * 1000)}</b></div>`;
+        }
+        c.innerHTML += `<div class="order-card" style="border-left:5px solid ${clr};"><div class="order-actions"><button class="menu-btn" onclick="deleteStockEvent(${i})"><span class="material-icons" style="color:var(--danger); font-size:22px;">delete_outline</span></button></div><div style="font-weight:800; font-size:18px; padding-right:30px;">${item.event || item.type} ${badge}</div><div style="color:${clr}; background-color:${bg}; padding:4px 8px; border-radius:6px; display:inline-block; font-size:11px; font-weight:700; text-transform:uppercase; margin-bottom:15px; margin-top:6px;">${item.type}</div>${sHtml}</div>`;  
+    });  
+}  
+  
+function deleteStockEvent(i){ if(confirm("Delete this inventory entry?")){ stockEvents.splice(i,1); localStorage.setItem("des_stock_events", JSON.stringify(stockEvents)); renderStockEvents(); updateRemainingStock(); renderHeliManager(); } }  
+
+function updateRemainingStock(){  
+    let tk = 0, thv = 0, th = 0, tg = 0; let pI = 0, p15 = 0, hvI = 0, hv15 = 0;
+    stockEvents.forEach(i=>{  
+        if (i.type.includes("Popularity")) { if (!i.injectedToLabels && !i.vaultSynced) tk += Number(i.totalPop || 0); } 
+        else if (i.type.includes("Home Votes")) { if (!i.injectedToLabels && !i.vaultSynced) thv += Number(i.totalHV || 0); } 
+        else if (i.type === "Helicopters") { th += Number(i.heliCount || 0); }
+    });  
+    
+    let lpa = 0; popLabelGroups.forEach(g => { 
+        lpa += Number(g.total || 0); 
+        g.accounts.forEach(a => { 
+            let s = a.pop || 0, l = a.level || "Below 10 level"; 
+            if (l === "Level 30+") { pI += s; p15 += s; } 
+            else if (l === "Level 25+" || l === "Level 10+") { pI += Math.min(s, 24000); p15 += Math.min(s, 24000); } 
+            else { pI += 0; p15 += Math.min(s, 24000); } 
+        }); 
+    });
+    
+    let lha = 0; hvLabelGroups.forEach(g => { 
+        lha += Number(g.total || 0); 
+        g.accounts.forEach(a => { 
+            let s = a.hv || 0, l = a.level || "Below 10 level"; 
+            if (l === "Level 30+") { hvI += s; hv15 += s; } 
+            else if (l === "Level 25+") { hvI += Math.min(s, 20000); hv15 += Math.min(s, 20000); } 
+            else { hvI += 0; hv15 += Math.min(s, 20000); } 
+        }); 
+    });
+    
+    accLabelGroups.forEach(g => g.accounts.forEach(a => { if(a.isGold) tg++; }));
+
+    document.getElementById("remainingPopStock").innerText = formatStockValue((tk * 1000) + lpa);  
+    if(document.getElementById("intPopStock")) document.getElementById("intPopStock").innerText = formatStockValue(lpa);
+    if(document.getElementById("extPopStock")) document.getElementById("extPopStock").innerText = formatStockValue(tk * 1000);
+
+    document.getElementById("remainingHVStock").innerText = formatStockValue((thv * 1000) + lha);  
+    if(document.getElementById("intHVStock")) document.getElementById("intHVStock").innerText = formatStockValue(lha);
+    if(document.getElementById("extHVStock")) document.getElementById("extHVStock").innerText = formatStockValue(thv * 1000);
+
+    document.getElementById("totalHeliStock").innerText = th;
+    document.getElementById("totalGoldAccounts").innerText = tg;
+    if(document.getElementById("calcPopInstant")) {
+        document.getElementById("calcPopInstant").innerText = formatStockValue(pI); document.getElementById("calcPop15m").innerText = formatStockValue(p15);
+        document.getElementById("calcHVInstant").innerText = formatStockValue(hvI); document.getElementById("calcHV15m").innerText = formatStockValue(hv15);
+    }
+} 
+
+function openPopVault() { renderPopLabels(); showPage('popVaultPage'); }
+function generatePopAccounts() { const l = document.getElementById("popLabelInput").value.trim(), c = parseInt(document.getElementById("popAccCountInput").value); if (!l || isNaN(c) || c <= 0) return alert("Enter label and count."); const dL = getDisplayLabel(l); const g = { label: dL, baseName: l, total: 0, accounts: [] }; for (let i = 1; i <= c; i++) { g.accounts.push({ name: generateSmartName(l, i), counts: { "1500": '', "600": '', "400": '', "200": '' }, pop: 0, isGold: false, level: 'Below 10 level' }); } popLabelGroups.unshift(g); savePopLabels(); updateRemainingStock(); document.getElementById("popLabelInput").value = ""; document.getElementById("popAccCountInput").value = ""; }
+function savePopLabels() { localStorage.setItem("des_pop_labels", JSON.stringify(popLabelGroups)); renderPopLabels(); renderPopLabelCheckboxes(); }
+function viewPopGroup(idx) { currentPopGroupIndex = idx; const g = popLabelGroups[idx]; document.getElementById("popGroupDetailsTitle").innerText = g.label; document.getElementById("activeGroupTotalM").innerText = formatStockValue(g.total || 0); renderPopGroupAccounts(); showPage('popGroupDetailsPage'); }
+function closePopGroupDetails() { currentPopGroupIndex = null; document.getElementById("popAccountSearch").value = ""; document.getElementById("modifyMultipleCard").style.display = "none"; renderPopLabels(); showPage('popVaultPage'); }
+function filterPopAccounts() { const q = document.getElementById("popAccountSearch").value.toLowerCase(); document.querySelectorAll(".pop-account-item").forEach(i => { i.style.display = i.querySelector(".account-name-label").innerText.toLowerCase().includes(q) ? "block" : "none"; }); }
+function addAccountToGroup() { if(currentPopGroupIndex === null) return; const g = popLabelGroups[currentPopGroupIndex]; let n = prompt("Enter new account name:", g.baseName ? generateSmartName(g.baseName, g.accounts.length + 1) : g.label + " " + (g.accounts.length + 1)); if(!n || !n.trim()) return; n = n.trim(); while(g.accounts.find(a => a.name.toLowerCase() === n.toLowerCase())) n += " *"; g.accounts.push({ name: n, counts: { "1500": '', "600": '', "400": '', "200": '' }, pop: 0, isGold: false, level: 'Below 10 level' }); g.accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); savePopLabels(); renderPopGroupAccounts(); if(document.getElementById("modifyMultipleCard").style.display === "block") openModifyMultiple(); }
+function openModifyMultiple() { if(currentPopGroupIndex === null) return; const g = popLabelGroups[currentPopGroupIndex], fSel = document.getElementById("modFrom"), tSel = document.getElementById("modTo"); fSel.innerHTML = ""; tSel.innerHTML = ""; g.accounts.forEach((a, i) => { fSel.innerHTML += `<option value="${i}">${a.name}</option>`; tSel.innerHTML += `<option value="${i}">${a.name}</option>`; }); document.getElementById("modifyMultipleCard").style.display = "block"; ["mod1500", "mod600", "mod400", "mod200"].forEach(id => document.getElementById(id).value = ""); document.getElementById("modifyMultipleCard").scrollIntoView({ behavior: "smooth", block: "start" }); }
+function closeModifyMultiple() { document.getElementById("modifyMultipleCard").style.display = "none"; }
+function applyModifyMultiple() { if(currentPopGroupIndex === null) return; const f = parseInt(document.getElementById("modFrom").value), t = parseInt(document.getElementById("modTo").value), v15 = document.getElementById("mod1500").value, v6 = document.getElementById("mod600").value, v4 = document.getElementById("mod400").value, v2 = document.getElementById("mod200").value, g = popLabelGroups[currentPopGroupIndex]; for(let i = Math.min(f, t); i <= Math.max(f, t); i++) { if(!g.accounts[i].counts) g.accounts[i].counts = { "1500": '', "600": '', "400": '', "200": '' }; if(v15 !== "") g.accounts[i].counts["1500"] = v15; if(v6 !== "") g.accounts[i].counts["600"] = v6; if(v4 !== "") g.accounts[i].counts["400"] = v4; if(v2 !== "") g.accounts[i].counts["200"] = v2; const c = g.accounts[i].counts; g.accounts[i].pop = (Number(c["1500"]) || 0) * 1500 + (Number(c["600"]) || 0) * 600 + (Number(c["400"]) || 0) * 400 + (Number(c["200"]) || 0) * 200; } g.total = g.accounts.reduce((sum, a) => sum + (a.pop || 0), 0); savePopLabels(); updateRemainingStock(); document.getElementById("activeGroupTotalM").innerText = formatStockValue(g.total); renderPopGroupAccounts(); closeModifyMultiple(); filterPopAccounts(); }
+function renderPopGroupAccounts() { if(currentPopGroupIndex === null) return; const gI = currentPopGroupIndex, g = popLabelGroups[gI], c = document.getElementById("popGroupAccountsContainer"); c.innerHTML = ""; let h = `<div style="display:flex; flex-direction:column; gap:15px;">`; g.accounts.forEach((a, aI) => { const ct = a.counts || { "1500": '', "600": '', "400": '', "200": '' }; h += `<div class="pop-account-item card" style="padding:15px; border-radius:16px; margin-bottom:0;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><div class="account-name-label" style="font-size:16px; font-weight:800;">${a.name}</div></div><div style="font-size:15px; font-weight:900; color:var(--primary); background-color:rgba(37, 99, 235, 0.1); padding:6px 12px; border-radius:8px;"><span id="acc-total-${gI}-${aI}">${formatStockValue(a.pop || 0)}</span></div></div><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"><div><div style="font-size:11px; text-align:center; font-weight:800; margin-bottom:6px;">1500</div><input type="number" value="${ct['1500']}" placeholder="-" oninput="updateMultiPopAcc(${gI}, ${aI}, '1500', this.value)" style="width: 100%; min-width:0; padding: 12px 4px; text-align: center; font-weight:700;"></div><div><div style="font-size:11px; text-align:center; font-weight:800; margin-bottom:6px;">600</div><input type="number" value="${ct['600']}" placeholder="-" oninput="updateMultiPopAcc(${gI}, ${aI}, '600', this.value)" style="width: 100%; min-width:0; padding: 12px 4px; text-align: center; font-weight:700;"></div><div><div style="font-size:11px; text-align:center; font-weight:800; margin-bottom:6px;">400</div><input type="number" value="${ct['400']}" placeholder="-" oninput="updateMultiPopAcc(${gI}, ${aI}, '400', this.value)" style="width: 100%; min-width:0; padding: 12px 4px; text-align: center; font-weight:700;"></div><div><div style="font-size:11px; text-align:center; font-weight:800; margin-bottom:6px;">200</div><input type="number" value="${ct['200']}" placeholder="-" oninput="updateMultiPopAcc(${gI}, ${aI}, '200', this.value)" style="width: 100%; min-width:0; padding: 12px 4px; text-align: center; font-weight:700;"></div></div></div>`; }); h += `</div>`; c.innerHTML = h; }
+function updateMultiPopAcc(gI, aI, t, v) { const g = popLabelGroups[gI]; if (!g.accounts[aI].counts) g.accounts[aI].counts = { "1500": "", "600": "", "400": "", "200": "" }; g.accounts[aI].counts[t] = v; const c = g.accounts[aI].counts, tot = (Number(c["1500"]) || 0) * 1500 + (Number(c["600"]) || 0) * 600 + (Number(c["400"]) || 0) * 400 + (Number(c["200"]) || 0) * 200; g.accounts[aI].pop = tot; g.total = g.accounts.reduce((s, a) => s + (a.pop || 0), 0); document.getElementById(`acc-total-${gI}-${aI}`).innerText = formatStockValue(tot); document.getElementById("activeGroupTotalM").innerText = formatStockValue(g.total); savePopLabels(); updateRemainingStock(); }
+function deleteSinglePopAcc(gI, aI) { if(confirm("Delete this account?")) { popLabelGroups[gI].accounts.splice(aI, 1); popLabelGroups[gI].total = popLabelGroups[gI].accounts.reduce((s, a) => s + (a.pop || 0), 0); savePopLabels(); updateRemainingStock(); if (currentPopGroupIndex === gI) { document.getElementById("activeGroupTotalM").innerText = formatStockValue(popLabelGroups[gI].total); renderPopGroupAccounts(); filterPopAccounts(); } } }
+function deletePopLabelGroup(i) {
+    if(confirm("Clear all stock values to 0 for this entire group?")) {
+        popLabelGroups[i].total = 0;
+        popLabelGroups[i].accounts.forEach(a => {
+            a.pop = 0;
+            a.counts = { "1500": '', "600": '', "400": '', "200": '' };
+        });
+        savePopLabels();
+        updateRemainingStock();
+    }
+}
+function renderPopLabels() { const c = document.getElementById("popLabelsList"); c.innerHTML = ""; if (popLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } let tA = 0; popLabelGroups.forEach(g => tA += g.accounts.length); c.innerHTML += `<div style="background-color: rgba(37, 99, 235, 0.05); border: 1px dashed var(--primary); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total Labels :-</span><span style="font-size:14px; font-weight:800; color:var(--primary);">${popLabelGroups.length}</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; popLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewPopGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--primary);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(37, 99, 235, 0.1); color: var(--primary); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="pop-group-total-${i}">${formatStockValue(g.total || 0)}</span></div><button class="menu-btn" onclick="deletePopLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); }
+
+function openHVVault() { renderHVLabels(); showPage('hvVaultPage'); }
+function generateHVAccounts() { const l = document.getElementById("hvLabelInput").value.trim(), c = parseInt(document.getElementById("hvAccCountInput").value); if (!l || isNaN(c) || c <= 0) return alert("Enter label and count."); const dL = getDisplayLabel(l), g = { label: dL, baseName: l, total: 0, accounts: [] }; for (let i = 1; i <= c; i++) g.accounts.push({ name: generateSmartName(l, i), cards: '', hv: 0, isGold: false, level: 'Below 10 level' }); hvLabelGroups.unshift(g); saveHVLabels(); updateRemainingStock(); document.getElementById("hvLabelInput").value = ""; document.getElementById("hvAccCountInput").value = ""; }
+function saveHVLabels() { localStorage.setItem("des_hv_labels", JSON.stringify(hvLabelGroups)); renderHVLabels(); renderHVLabelCheckboxes(); }
+function viewHVGroup(idx) { currentHVGroupIndex = idx; const g = hvLabelGroups[idx]; document.getElementById("hvGroupDetailsTitle").innerText = g.label; document.getElementById("activeHVGroupTotalM").innerText = formatStockValue(g.total || 0); renderHVGroupAccounts(); showPage('hvGroupDetailsPage'); }
+function closeHVGroupDetails() { currentHVGroupIndex = null; document.getElementById("hvAccountSearch").value = ""; document.getElementById("hvModifyMultipleCard").style.display = "none"; renderHVLabels(); showPage('hvVaultPage'); }
+function filterHVAccounts() { const q = document.getElementById("hvAccountSearch").value.toLowerCase(); document.querySelectorAll(".hv-account-item").forEach(i => { i.style.display = i.querySelector(".hv-account-name-label").innerText.toLowerCase().includes(q) ? "block" : "none"; }); }
+function addAccountToHVGroup() { if(currentHVGroupIndex === null) return; const g = hvLabelGroups[currentHVGroupIndex]; let n = prompt("Enter new account name:", g.baseName ? generateSmartName(g.baseName, g.accounts.length + 1) : g.label + " " + (g.accounts.length + 1)); if(!n || !n.trim()) return; n = n.trim(); while(g.accounts.find(a => a.name.toLowerCase() === n.toLowerCase())) n += " *"; g.accounts.push({ name: n, cards: '', hv: 0, isGold: false, level: 'Below 10 level' }); g.accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveHVLabels(); renderHVGroupAccounts(); if(document.getElementById("hvModifyMultipleCard").style.display === "block") openHVModifyMultiple(); }
+function openHVModifyMultiple() { if(currentHVGroupIndex === null) return; const g = hvLabelGroups[currentHVGroupIndex], fSel = document.getElementById("hvModFrom"), tSel = document.getElementById("hvModTo"); fSel.innerHTML = ""; tSel.innerHTML = ""; g.accounts.forEach((a, i) => { fSel.innerHTML += `<option value="${i}">${a.name}</option>`; tSel.innerHTML += `<option value="${i}">${a.name}</option>`; }); document.getElementById("hvModifyMultipleCard").style.display = "block"; document.getElementById("modHVCards").value = ""; document.getElementById("hvModifyMultipleCard").scrollIntoView({ behavior: "smooth", block: "start" }); }
+function closeHVModifyMultiple() { document.getElementById("hvModifyMultipleCard").style.display = "none"; }
+function applyHVModifyMultiple() { if(currentHVGroupIndex === null) return; const f = parseInt(document.getElementById("hvModFrom").value), t = parseInt(document.getElementById("hvModTo").value), vC = document.getElementById("modHVCards").value; if (vC === "") return closeHVModifyMultiple(); const g = hvLabelGroups[currentHVGroupIndex]; for(let i = Math.min(f, t); i <= Math.max(f, t); i++) { g.accounts[i].cards = vC; g.accounts[i].hv = Number(vC) * 100; } g.total = g.accounts.reduce((s, a) => s + (a.hv || 0), 0); saveHVLabels(); updateRemainingStock(); document.getElementById("activeHVGroupTotalM").innerText = formatStockValue(g.total); renderHVGroupAccounts(); closeHVModifyMultiple(); filterHVAccounts(); }
+function renderHVGroupAccounts() { if(currentHVGroupIndex === null) return; const gI = currentHVGroupIndex, g = hvLabelGroups[gI], c = document.getElementById("hvGroupAccountsContainer"); c.innerHTML = ""; let h = `<div style="display:flex; flex-direction:column; gap:15px;">`; g.accounts.forEach((a, aI) => { h += `<div class="hv-account-item card" style="padding:15px; border-radius:16px; margin-bottom:0;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><div class="hv-account-name-label" style="font-size:16px; font-weight:800;">${a.name}</div></div><div style="font-size:15px; font-weight:900; color:var(--success); background-color:rgba(22, 163, 74, 0.1); padding:6px 12px; border-radius:8px;"><span id="hv-acc-total-${gI}-${aI}">${formatStockValue(a.hv || 0)}</span></div></div><div style="display: grid; grid-template-columns: 1fr; gap: 10px;"><div><div style="font-size:11px; text-align:center; font-weight:800; margin-bottom:6px;">No. of CARDS</div><input type="number" value="${a.cards}" placeholder="-" oninput="updateSingleHVAcc(${gI}, ${aI}, this.value)" style="width: 100%; min-width:0; padding: 12px 4px; text-align: center; font-weight:700; border-color:var(--success);"></div></div></div>`; }); h += `</div>`; c.innerHTML = h; }
+function updateSingleHVAcc(gI, aI, v) { const h = (Number(v) || 0) * 100; hvLabelGroups[gI].accounts[aI].cards = v; hvLabelGroups[gI].accounts[aI].hv = h; hvLabelGroups[gI].total = hvLabelGroups[gI].accounts.reduce((s, a) => s + (a.hv || 0), 0); localStorage.setItem("des_hv_labels", JSON.stringify(hvLabelGroups)); if(document.getElementById(`hv-acc-total-${gI}-${aI}`)) document.getElementById(`hv-acc-total-${gI}-${aI}`).innerText = formatStockValue(h); if(document.getElementById("activeHVGroupTotalM") && currentHVGroupIndex === gI) document.getElementById("activeHVGroupTotalM").innerText = formatStockValue(hvLabelGroups[gI].total); updateRemainingStock(); }
+function deleteSingleHVAcc(gI, aI) { if(confirm("Delete this account?")) { hvLabelGroups[gI].accounts.splice(aI, 1); hvLabelGroups[gI].total = hvLabelGroups[gI].accounts.reduce((s, a) => s + (a.hv || 0), 0); saveHVLabels(); updateRemainingStock(); if (currentHVGroupIndex === gI) { document.getElementById("activeHVGroupTotalM").innerText = formatStockValue(hvLabelGroups[gI].total); renderHVGroupAccounts(); filterHVAccounts(); } } }
+function deleteHVLabelGroup(i) {
+    if(confirm("Clear all stock values to 0 for this entire group?")) {
+        hvLabelGroups[i].total = 0;
+        hvLabelGroups[i].accounts.forEach(a => {
+            a.hv = 0;
+            a.cards = '';
+        });
+        saveHVLabels();
+        updateRemainingStock();
+    }
+}
+function renderHVLabels() { const c = document.getElementById("hvLabelsList"); c.innerHTML = ""; if (hvLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } let tA = 0; hvLabelGroups.forEach(g => tA += g.accounts.length); c.innerHTML += `<div style="background-color: rgba(22, 163, 74, 0.05); border: 1px dashed var(--success); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total Labels :-</span><span style="font-size:14px; font-weight:800; color:var(--success);">${hvLabelGroups.length}</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; hvLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewHVGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--success);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(22, 163, 74, 0.1); color: var(--success); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="hv-group-total-${i}">${formatStockValue(g.total || 0)}</span></div><button class="menu-btn" onclick="deleteHVLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); }
+
+function openHeliVault() { renderHeliManager(); showPage('heliVaultPage'); }
+function renderHeliManager() { const c = document.getElementById("heliManagerList"); c.innerHTML = ""; let hH = false; stockEvents.forEach((i, idx) => { if (i.type === "Helicopters") { hH = true; c.innerHTML += `<div style="display:flex; align-items:center; justify-content:space-between; background-color:var(--bg-color); padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid var(--border);"><div style="font-weight:700; flex:1; font-size:15px;">${i.idName || i.event}</div><div style="display:flex; align-items:center; gap:10px;"><input type="number" value="${i.heliCount}" onchange="updateHeliCount(${idx}, this.value)" style="width:75px; min-width:0; padding:10px; text-align:center; font-weight:800; font-size:16px;"><button class="menu-btn" onclick="deleteStockEvent(${idx})"><span class="material-icons" style="color:var(--danger); font-size:22px;">delete</span></button></div></div>`; } }); if(!hH) c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No helicopters yet.</div>`; }
+function updateHeliCount(i, n) { stockEvents[i].heliCount = Number(n); localStorage.setItem("des_stock_events", JSON.stringify(stockEvents)); updateRemainingStock(); renderStockEvents(); }
+
+function openGoldVault() { renderGoldLabels(); showPage('goldVaultPage'); }
+function renderGoldLabels() { const c = document.getElementById("goldLabelsList"); c.innerHTML = ""; if (accLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No labels yet.</div>`; return; } accLabelGroups.forEach((g, i) => { let gC = 0; g.accounts.forEach(a => { if(a.isGold) gC++; }); c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer;" onclick="viewGoldGroup(${i})"><div style="display:flex; align-items:center; gap:10px; flex:1;"><span style="font-weight: 800; font-size: 15px; color:var(--gold);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(234, 179, 8, 0.1); color: var(--gold); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;">${gC} <span class="material-icons" style="font-size:14px; vertical-align:middle;">stars</span></div></div></div></div>`; }); }
+function viewGoldGroup(i) { currentGoldGroupIndex = i; document.getElementById("goldGroupDetailsTitle").innerText = accLabelGroups[i].label; renderGoldGroupAccounts(); showPage('goldGroupDetailsPage'); }
+function closeGoldGroupDetails() { currentGoldGroupIndex = null; document.getElementById("goldAccountSearch").value = ""; document.getElementById("goldModifyMultipleCard").style.display = "none"; renderGoldLabels(); showPage('goldVaultPage'); }
+function filterGoldAccounts() { const q = document.getElementById("goldAccountSearch").value.toLowerCase(); document.querySelectorAll(".gold-account-item").forEach(i => { i.style.display = i.querySelector(".gold-account-name-label").innerText.toLowerCase().includes(q) ? "block" : "none"; }); }
+function openGoldModifyMultiple() { if(currentGoldGroupIndex === null) return; const g = accLabelGroups[currentGoldGroupIndex], fSel = document.getElementById("goldModFrom"), tSel = document.getElementById("goldModTo"); fSel.innerHTML = ""; tSel.innerHTML = ""; g.accounts.forEach((a, i) => { fSel.innerHTML += `<option value="${i}">${a.name}</option>`; tSel.innerHTML += `<option value="${i}">${a.name}</option>`; }); document.getElementById("goldModifyMultipleCard").style.display = "block"; document.getElementById("goldModifyMultipleCard").scrollIntoView({ behavior: "smooth", block: "start" }); }
+function closeGoldModifyMultiple() { document.getElementById("goldModifyMultipleCard").style.display = "none"; }
+function toggleSingleGold(gI, aI, st) { if (accLabelGroups[gI]) accLabelGroups[gI].accounts[aI].isGold = st; if (popLabelGroups[gI]) popLabelGroups[gI].accounts[aI].isGold = st; if (hvLabelGroups[gI]) hvLabelGroups[gI].accounts[aI].isGold = st; saveAccLabels(); savePopLabels(); saveHVLabels(); updateRemainingStock(); renderGoldGroupAccounts(); }
+function applyGoldModifyMultiple() { if(currentGoldGroupIndex === null) return; const f = parseInt(document.getElementById("goldModFrom").value), t = parseInt(document.getElementById("goldModTo").value), st = document.getElementById("goldModStatus").value === "true", gI = currentGoldGroupIndex; for(let i = Math.min(f, t); i <= Math.max(f, t); i++) { if (accLabelGroups[gI]) accLabelGroups[gI].accounts[i].isGold = st; if (popLabelGroups[gI]) popLabelGroups[gI].accounts[i].isGold = st; if (hvLabelGroups[gI]) hvLabelGroups[gI].accounts[i].isGold = st; } saveAccLabels(); savePopLabels(); saveHVLabels(); updateRemainingStock(); renderGoldGroupAccounts(); closeGoldModifyMultiple(); filterGoldAccounts(); }
+function renderGoldGroupAccounts() { if(currentGoldGroupIndex === null) return; const gI = currentGoldGroupIndex, g = accLabelGroups[gI], c = document.getElementById("goldGroupAccountsContainer"); c.innerHTML = ""; let gc = 0, h = `<div style="display:flex; flex-direction:column; gap:12px;">`; g.accounts.forEach((a, aI) => { if(a.isGold) gc++; h += `<div class="gold-account-item card" style="padding:15px; border-radius:16px; margin-bottom:0;"><label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; width:100%; margin:0;"><div style="display:flex; align-items:center; gap:12px;"><input type="checkbox" onchange="toggleSingleGold(${gI}, ${aI}, this.checked)" ${a.isGold ? 'checked' : ''} style="width:22px; height:22px; accent-color:var(--gold); margin:0; cursor:pointer;"><div class="gold-account-name-label" style="font-size:16px; font-weight:800;">${a.name}</div></div>${a.isGold ? `<span class="material-icons" style="color:var(--gold);">stars</span>` : `<span class="material-icons" style="color:var(--text-muted); opacity:0.3;">star_outline</span>`}</label></div>`; }); h += `</div>`; c.innerHTML = h; document.getElementById("activeGroupGoldCount").innerText = gc; }
+
+function toggleLevelManager() { const c = document.getElementById("levelManagerCard"); const wc = (c.style.display === "none" || c.style.display === ""); if (wc) { c.style.display = "block"; c.style.animation = "fadeInDrop 0.2s ease forwards"; renderLevelLabels(); } else { c.style.display = "none"; } }
+function renderLevelLabels() { const c = document.getElementById("levelLabelsList"); c.innerHTML = ""; if (accLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No labels yet.</div>`; return; } accLabelGroups.forEach((g, i) => { const aC = g.accounts.length; c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer;" onclick="viewLevelGroup(${i})"><div style="display:flex; align-items:center; gap:10px; flex:1;"><span style="font-weight: 800; font-size: 15px; color:var(--level);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${aC} accounts</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(139, 92, 246, 0.1); color: var(--level); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align:middle;">tune</span> Set</div></div></div></div>`; }); }
+function viewLevelGroup(i) { currentLevelGroupIndex = i; document.getElementById("levelGroupDetailsTitle").innerText = accLabelGroups[i].label; renderLevelGroupAccounts(); showPage('levelGroupDetailsPage'); }
+function closeLevelGroupDetails() { currentLevelGroupIndex = null; document.getElementById("levelAccountSearch").value = ""; document.getElementById("levelModifyMultipleCard").style.display = "none"; renderLevelLabels(); showPage('accountsManagerPage'); }
+function filterLevelAccounts() { const q = document.getElementById("levelAccountSearch").value.toLowerCase(); document.querySelectorAll(".level-account-item").forEach(i => { i.style.display = i.querySelector(".level-account-name-label").innerText.toLowerCase().includes(q) ? "block" : "none"; }); }
+function openLevelModifyMultiple() { if(currentLevelGroupIndex === null) return; const g = accLabelGroups[currentLevelGroupIndex], fSel = document.getElementById("levelModFrom"), tSel = document.getElementById("levelModTo"); fSel.innerHTML = ""; tSel.innerHTML = ""; g.accounts.forEach((a, i) => { fSel.innerHTML += `<option value="${i}">${a.name}</option>`; tSel.innerHTML += `<option value="${i}">${a.name}</option>`; }); document.getElementById("levelModifyMultipleCard").style.display = "block"; document.getElementById("levelModifyMultipleCard").scrollIntoView({ behavior: "smooth", block: "start" }); }
+function closeLevelModifyMultiple() { document.getElementById("levelModifyMultipleCard").style.display = "none"; }
+function toggleSingleLevel(gI, aI, lvl) { if (accLabelGroups[gI]) accLabelGroups[gI].accounts[aI].level = lvl; if (popLabelGroups[gI]) popLabelGroups[gI].accounts[aI].level = lvl; if (hvLabelGroups[gI]) hvLabelGroups[gI].accounts[aI].level = lvl; saveAccLabels(); savePopLabels(); saveHVLabels(); updateRemainingStock(); renderLevelGroupAccounts(); }
+function applyLevelModifyMultiple() { if(currentLevelGroupIndex === null) return; const f = parseInt(document.getElementById("levelModFrom").value), t = parseInt(document.getElementById("levelModTo").value), st = document.getElementById("levelModStatus").value, gI = currentLevelGroupIndex; for(let i = Math.min(f, t); i <= Math.max(f, t); i++) { if (accLabelGroups[gI]) accLabelGroups[gI].accounts[i].level = st; if (popLabelGroups[gI]) popLabelGroups[gI].accounts[i].level = st; if (hvLabelGroups[gI]) hvLabelGroups[gI].accounts[i].level = st; } saveAccLabels(); savePopLabels(); saveHVLabels(); updateRemainingStock(); renderLevelGroupAccounts(); closeLevelModifyMultiple(); filterLevelAccounts(); }
+function renderLevelGroupAccounts() { if(currentLevelGroupIndex === null) return; const gI = currentLevelGroupIndex, g = accLabelGroups[gI], c = document.getElementById("levelGroupAccountsContainer"); c.innerHTML = ""; let h = `<div style="display:flex; flex-direction:column; gap:12px;">`; g.accounts.forEach((a, aI) => { let cL = a.level || "Below 10 level"; h += `<div class="level-account-item card" style="padding:15px; border-radius:16px; margin-bottom:0; display:flex; justify-content:space-between; align-items:center;"><div class="level-account-name-label" style="font-size:15px; font-weight:800;">${a.name}</div><select onchange="toggleSingleLevel(${gI}, ${aI}, this.value)" style="width:140px; padding:8px 10px; font-size:13px; border-color:var(--level);"><option value="Below 10 level" ${cL === 'Below 10 level' ? 'selected' : ''}>Below 10 level</option><option value="Level 10+" ${cL === 'Level 10+' ? 'selected' : ''}>Level 10+</option><option value="Level 25+" ${cL === 'Level 25+' ? 'selected' : ''}>Level 25+</option><option value="Level 30+" ${cL === 'Level 30+' ? 'selected' : ''}>Level 30+</option></select></div>`; }); h += `</div>`; c.innerHTML = h; }
+
+function generateAccAccounts() { const l = document.getElementById("accLabelInput").value.trim(), c = parseInt(document.getElementById("accCountInput").value); if (!l || isNaN(c) || c <= 0) return alert("Enter label and count."); const dL = getDisplayLabel(l); const gA = { label: dL, baseName: l, accounts: [] }, gP = { label: dL, baseName: l, total: 0, accounts: [] }, gH = { label: dL, baseName: l, total: 0, accounts: [] }; for (let i = 1; i <= c; i++) { const aN = generateSmartName(l, i); gA.accounts.push({ name: aN, x_username: '', email: '', isGold: false, level: 'Below 10 level' }); gP.accounts.push({ name: aN, counts: { "1500": '', "600": '', "400": '', "200": '' }, pop: 0, isGold: false, level: 'Below 10 level' }); gH.accounts.push({ name: aN, cards: '', hv: 0, isGold: false, level: 'Below 10 level' }); } accLabelGroups.unshift(gA); saveAccLabels(); popLabelGroups.unshift(gP); savePopLabels(); hvLabelGroups.unshift(gH); saveHVLabels(); updateRemainingStock(); document.getElementById("accLabelInput").value = ""; document.getElementById("accCountInput").value = ""; }
+function saveAccLabels() { localStorage.setItem("des_acc_labels", JSON.stringify(accLabelGroups)); renderAccLabels(); renderLevelLabels(); syncAllVaults(); }
+function viewAccGroup(i) { currentAccGroupIndex = i; document.getElementById("accGroupDetailsTitle").innerText = accLabelGroups[i].label; renderAccGroupAccounts(); showPage('accGroupDetailsPage'); }
+function closeAccGroupDetails() { currentAccGroupIndex = null; document.getElementById("accSearch").value = ""; document.getElementById("accModifyMultipleCard").style.display = "none"; renderAccLabels(); showPage('accountsManagerPage'); }
+function filterAccAccounts() { const q = document.getElementById("accSearch").value.toLowerCase(); document.querySelectorAll(".acc-account-item").forEach(i => { i.style.display = i.querySelector(".acc-name-label").innerText.toLowerCase().includes(q) ? "block" : "none"; }); }
+function addAccountToAccGroup() { if(currentAccGroupIndex === null) return; const gI = currentAccGroupIndex, g = accLabelGroups[gI]; let n = prompt("Enter new account name (This will sync to Pop & HV Vaults):", g.baseName ? generateSmartName(g.baseName, g.accounts.length + 1) : g.label + " " + (g.accounts.length + 1)); if(!n || !n.trim()) return; n = n.trim(); while(g.accounts.find(a => a.name.toLowerCase() === n.toLowerCase())) n += " *"; g.accounts.push({ name: n, x_username: '', email: '', isGold: false, level: 'Below 10 level' }); g.accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveAccLabels(); if (popLabelGroups[gI]) { popLabelGroups[gI].accounts.push({ name: n, counts: { "1500": '', "600": '', "400": '', "200": '' }, pop: 0, isGold: false, level: 'Below 10 level' }); popLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); savePopLabels(); } if (hvLabelGroups[gI]) { hvLabelGroups[gI].accounts.push({ name: n, cards: '', hv: 0, isGold: false, level: 'Below 10 level' }); hvLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveHVLabels(); } renderAccGroupAccounts(); if(document.getElementById("accModifyMultipleCard").style.display === "block") openAccModifyMultiple(); }
+function openAccModifyMultiple() { if(currentAccGroupIndex === null) return; const g = accLabelGroups[currentAccGroupIndex], fSel = document.getElementById("accModFrom"), tSel = document.getElementById("accModTo"); fSel.innerHTML = ""; tSel.innerHTML = ""; g.accounts.forEach((a, i) => { fSel.innerHTML += `<option value="${i}">${a.name}</option>`; tSel.innerHTML += `<option value="${i}">${a.name}</option>`; }); document.getElementById("accModifyMultipleCard").style.display = "block"; document.getElementById("modAccUsername").value = ""; document.getElementById("modAccEmail").value = ""; document.getElementById("accModifyMultipleCard").scrollIntoView({ behavior: "smooth", block: "start" }); }
+function closeAccModifyMultiple() { document.getElementById("accModifyMultipleCard").style.display = "none"; }
+function applyAccModifyMultiple() { if(currentAccGroupIndex === null) return; const f = parseInt(document.getElementById("accModFrom").value), t = parseInt(document.getElementById("accModTo").value), bU = document.getElementById("modAccUsername").value.trim(), bE = document.getElementById("modAccEmail").value.trim(); if (bU === "" && bE === "") return closeAccModifyMultiple(); const g = accLabelGroups[currentAccGroupIndex]; for(let i = Math.min(f, t); i <= Math.max(f, t); i++) { const o = i - Math.min(f, t); if (bU !== "") g.accounts[i].x_username = parseAndIncrement(bU, o); if (bE !== "") g.accounts[i].email = parseAndIncrement(bE, o); } saveAccLabels(); renderAccGroupAccounts(); closeAccModifyMultiple(); filterAccAccounts(); }
+function renameSingleAcc(gI, aI) {
+    const oldName = accLabelGroups[gI].accounts[aI].name;
+    let newName = prompt("Enter new name for account:", oldName);
+    if (!newName || newName.trim() === "" || newName.trim() === oldName) return;
+    newName = newName.trim();
+    
+    if (accLabelGroups[gI].accounts.some((a, idx) => idx !== aI && a.name.toLowerCase() === newName.toLowerCase())) {
+        alert("An account with this name already exists in this group.");
+        return;
+    }
+    
+    accLabelGroups[gI].accounts[aI].name = newName;
+    accLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'}));
+    saveAccLabels();
+    
+    if (popLabelGroups[gI]) {
+        const pI = popLabelGroups[gI].accounts.findIndex(a => a.name === oldName);
+        if (pI !== -1) {
+            popLabelGroups[gI].accounts[pI].name = newName;
+            popLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'}));
+            savePopLabels();
+        }
+    }
+    if (hvLabelGroups[gI]) {
+        const hI = hvLabelGroups[gI].accounts.findIndex(a => a.name === oldName);
+        if (hI !== -1) {
+            hvLabelGroups[gI].accounts[hI].name = newName;
+            hvLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'}));
+            saveHVLabels();
+        }
+    }
+    
+    updateRemainingStock();
+    if (currentAccGroupIndex === gI) {
+        renderAccGroupAccounts();
+        filterAccAccounts();
+    }
+}
+function renderAccGroupAccounts() { if(currentAccGroupIndex === null) return; const gI = currentAccGroupIndex, g = accLabelGroups[gI], c = document.getElementById("accGroupAccountsContainer"); c.innerHTML = ""; let h = `<div style="display:flex; flex-direction:column; gap:15px;">`; g.accounts.forEach((a, aI) => { h += `<div class="acc-account-item card" style="padding:15px; border-radius:16px; margin-bottom:0;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><button class="menu-btn" onclick="deleteSingleAcc(${gI}, ${aI})" style="width:30px; height:30px; min-width:30px; background-color:rgba(239, 68, 68, 0.1);"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button><button class="menu-btn" onclick="renameSingleAcc(${gI}, ${aI})" style="width:30px; height:30px; min-width:30px; background-color:rgba(37, 99, 235, 0.1);"><span class="material-icons" style="color:var(--primary); font-size:18px;">edit</span></button><div class="acc-name-label" style="font-size:16px; font-weight:800;">${a.name}</div></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div><div style="font-size:11px; color:var(--text-muted); font-weight:800; margin-bottom:6px;">X USERNAME</div><input type="text" value="${a.x_username || ''}" placeholder="-" onchange="updateSingleAcc(${gI}, ${aI}, 'x_username', this.value)" style="width: 100%; padding: 12px 10px; font-size: 14px; font-weight:600;"></div><div><div style="font-size:11px; color:var(--text-muted); font-weight:800; margin-bottom:6px;">EMAIL</div><input type="text" value="${a.email || ''}" placeholder="-" onchange="updateSingleAcc(${gI}, ${aI}, 'email', this.value)" style="width: 100%; padding: 12px 10px; font-size: 14px; font-weight:600;"></div></div></div>`; }); h += `</div>`; c.innerHTML = h; }
+function updateSingleAcc(gI, aI, f, v) { accLabelGroups[gI].accounts[aI][f] = v.trim(); localStorage.setItem("des_acc_labels", JSON.stringify(accLabelGroups)); }
+function deleteSingleAcc(gI, aI) { if(confirm("Delete this account? Removes from all vaults.")) { const n = accLabelGroups[gI].accounts[aI].name; accLabelGroups[gI].accounts.splice(aI, 1); saveAccLabels(); if (popLabelGroups[gI]) { const pI = popLabelGroups[gI].accounts.findIndex(a => a.name === n); if (pI !== -1) { popLabelGroups[gI].accounts.splice(pI, 1); popLabelGroups[gI].total = popLabelGroups[gI].accounts.reduce((s, a) => s + (a.pop || 0), 0); savePopLabels(); } } if (hvLabelGroups[gI]) { const hI = hvLabelGroups[gI].accounts.findIndex(a => a.name === n); if (hI !== -1) { hvLabelGroups[gI].accounts.splice(hI, 1); hvLabelGroups[gI].total = hvLabelGroups[gI].accounts.reduce((s, a) => s + (a.hv || 0), 0); saveHVLabels(); } } updateRemainingStock(); if (currentAccGroupIndex === gI) { renderAccGroupAccounts(); filterAccAccounts(); } } }
+function deleteAccLabelGroup(i) { if(confirm("Delete entire group? Deletes from all vaults.")) { accLabelGroups.splice(i, 1); saveAccLabels(); if (popLabelGroups[i]) { popLabelGroups.splice(i, 1); savePopLabels(); } if (hvLabelGroups[i]) { hvLabelGroups.splice(i, 1); saveHVLabels(); } updateRemainingStock(); } }
+function renderAccLabels() { const c = document.getElementById("accLabelsList"); if(!c) return; c.innerHTML = ""; if (accLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No labels yet.</div>`; return; } let tA = 0; accLabelGroups.forEach(g => tA += g.accounts.length); c.innerHTML += `<div style="background-color: rgba(20, 184, 166, 0.05); border: 1px dashed #14b8a6; border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total Labels :-</span><span style="font-size:14px; font-weight:800; color:#14b8a6;">${accLabelGroups.length}</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; accLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewAccGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:#14b8a6;">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><button class="menu-btn" onclick="deleteAccLabelGroup(${i})" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); }
+
+function calculateResellProfit() { const p = (Number(document.getElementById("resellQty").value || 0) / 1000) * Number(document.getElementById("resellMargin").value || 250); document.getElementById("resellProfit").value = "₹" + p.toFixed(2); }
+function saveResellOrder() { const c = document.getElementById("resellCustomer").value, q = document.getElementById("resellQty").value, m = document.getElementById("resellMargin").value; if(!c || !q) return alert("Fill all fields"); const ro = { id: "RES-" + String(resellOrders.length + 1).padStart(6, "0"), customer: c, item: document.getElementById("resellItem").value, margin: m, qty: q, profit: (Number(q) / 1000) * Number(m), status: document.getElementById("resellStatus").value, date: new Date().toLocaleString() }; resellOrders.push(ro); localStorage.setItem("des_resell_orders", JSON.stringify(resellOrders)); document.getElementById("resellCustomer").value = ""; document.getElementById("resellQty").value = ""; renderResellOrders(); updateDashboard(); navTo("resellPage"); }
+function renderResellOrders() { const c = document.getElementById("resellContainer"); if(!c) return; c.innerHTML = ""; [...resellOrders].reverse().forEach((o, oI) => { const i = resellOrders.length - 1 - oI, b = o.status === "Paid" ? "var(--success)" : "var(--warning)", bg = o.status === "Paid" ? "rgba(22, 163, 74, 0.1)" : "rgba(245, 158, 11, 0.1)"; c.innerHTML += `<div class="order-card" style="border-left: 4px solid var(--secondary);"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><div class="order-id" style="color:var(--secondary); background-color:rgba(124, 58, 237, 0.1);">${o.id}</div><div style="font-size:16px; font-weight:800; margin-top:8px;">${o.customer}</div><div style="font-size:13px; color:var(--text-muted); margin-top:4px;">${o.qty}K &bull; Margin: ₹${o.margin}/M</div></div><div style="text-align:right;"><button class="menu-btn" style="display:inline-flex; float:right;" onclick="deleteResellOrder(${i})"><span class="material-icons" style="font-size:20px; color:var(--danger);">delete</span></button></div></div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; border-top:1px solid var(--border); padding-top:12px;"><div><span style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Est. Profit</span><br><span style="font-size:18px; font-weight:800; color:var(--success);">₹${o.profit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div><button onclick="toggleResellStatus(${i})" style="background-color:${bg}; color:${b}; border:none; padding:6px 12px; border-radius:12px; font-size:12px; font-weight:800; cursor:pointer; text-transform:uppercase;">${o.status}</button></div></div>`; }); }
+function deleteResellOrder(i) { if(confirm("Delete resell record?")) { resellOrders.splice(i, 1); localStorage.setItem("des_resell_orders", JSON.stringify(resellOrders)); renderResellOrders(); updateDashboard(); } }
+function toggleResellStatus(i) { resellOrders[i].status = resellOrders[i].status === "Pending" ? "Paid" : "Pending"; localStorage.setItem("des_resell_orders", JSON.stringify(resellOrders)); renderResellOrders(); updateDashboard(); }
+
+function renderLedger() {
+    const c = document.getElementById("ledgerContainer"); if(!c) return; c.innerHTML = ""; const q = document.getElementById("ledgerSearch").value.toLowerCase(), map = new Map();
+    orders.forEach(o => { const n = o.customer; if(!map.has(n)) map.set(n, { dAmt: 0, dCnt: 0, dOrd: [], rProf: 0, rCnt: 0 }); const d = map.get(n); d.dAmt += Number(o.amount); d.dCnt += 1; d.dOrd.push(o); });
+    resellOrders.forEach(o => { const n = o.customer; if(!map.has(n)) map.set(n, { dAmt: 0, dCnt: 0, dOrd: [], rProf: 0, rCnt: 0 }); const d = map.get(n); d.rProf += Number(o.profit); d.rCnt += 1; });
+    const sC = Array.from(map.entries()).sort((a, b) => (b[1].dAmt + b[1].rProf) - (a[1].dAmt + a[1].rProf)); let rCnt = 0;
+    sC.forEach(([n, d]) => {
+        if(n.toLowerCase().includes(q)) {
+            rCnt++; let h = `<div class="order-card" style="margin-bottom:15px; border-radius:16px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><div style="font-size:18px; font-weight:800;">${n}</div><div style="font-size:12px; font-weight:700; color:var(--text-muted); background-color:var(--bg-color); padding:4px 8px; border-radius:8px;">${d.dCnt + d.rCnt} Total Orders</div></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">`;
+            if(d.dCnt > 0) h += `<div style="background-color:rgba(37, 99, 235, 0.05); border:1px solid rgba(37, 99, 235, 0.2); border-radius:12px; padding:10px;"><div style="font-size:11px; color:var(--primary); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Direct Spend</div><div style="font-size:16px; font-weight:800;">₹${d.dAmt.toLocaleString()}</div></div>`;
+            if(d.rCnt > 0) h += `<div style="background-color:rgba(124, 58, 237, 0.05); border:1px solid rgba(124, 58, 237, 0.2); border-radius:12px; padding:10px;"><div style="font-size:11px; color:var(--secondary); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Resell Profit</div><div style="font-size:16px; font-weight:800;">₹${d.rProf.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div></div>`;
+            h += `</div>`;
+            if(d.dOrd.length > 0) { const ro = d.dOrd[d.dOrd.length - 1]; h += `<div style="border-top:1px dashed var(--border); padding-top:10px; display:flex; justify-content:space-between; align-items:center;"><div style="font-size:12px; color:var(--text-muted);"><span style="font-weight:600; color:var(--text-color);">Last Order:</span> ${ro.date.split(',')[0]}</div><button class="action-btn" style="background-color:var(--bg-color); color:var(--text-color); padding:6px 12px; font-size:12px; border-radius:8px; box-shadow:none; border:1px solid var(--border);" onclick="viewCustomerOrders('${n}')">View History</button></div>`; }
+            h += `</div>`; c.innerHTML += h;
+        }
+    });
+    if(rCnt === 0) c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px 0; font-style:italic;">No records found.</div>`;
+}
+
+function viewCustomerOrders(n) { document.getElementById("customerOrdersTitle").innerText = n; const c = document.getElementById("customerOrdersContainer"); c.innerHTML = ""; const ord = orders.filter(o => o.customer === n).reverse(); if(ord.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No direct orders.</div>`; } else { ord.forEach(o => { const b = o.status === "Paid" ? "var(--success)" : "var(--warning)", bg = o.status === "Paid" ? "rgba(22, 163, 74, 0.1)" : "rgba(245, 158, 11, 0.1)"; c.innerHTML += `<div class="order-card" style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><div class="order-id" style="font-size:11px; padding:4px 8px;">${o.id}</div><div style="font-size:14px; font-weight:700; margin-top:8px;">${o.item}</div><div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${o.details}</div></div><div style="text-align:right;"><div style="font-size:16px; font-weight:800;">₹${o.amount.toLocaleString()}</div><div style="font-size:10px; font-weight:700; color:${b}; background-color:${bg}; padding:4px 8px; border-radius:6px; display:inline-block; margin-top:6px; text-transform:uppercase;">${o.status}</div></div></div><div style="font-size:11px; color:var(--text-muted); margin-top:10px; border-top:1px solid var(--border); padding-top:8px;">${o.date}</div></div>`; }); } showPage('customerOrdersPage'); }
+
+function resetMonthData(){ if(confirm("DANGER! This deletes ALL orders, resell records, and invoices. Continue?")){ orders = []; resellOrders = []; invoices = []; localStorage.setItem("des_orders", JSON.stringify([])); localStorage.setItem("des_resell_orders", JSON.stringify([])); localStorage.setItem("des_invoices", JSON.stringify([])); renderOrders(); renderResellOrders(); renderInvoiceHistory(); renderLedger(); updateDashboard(); loadInvoiceOrders(); renderMultiOrders(); alert("System Data Reset Successful."); } }
+  
+window.onload = function() {  
+    if (localStorage.getItem("des_dark_mode") === "true") { document.body.classList.add("dark-mode"); document.getElementById("darkModeIcon").innerText = "light_mode"; document.getElementById("darkModeText").innerText = "Disable Dark Mode"; }
+    migrateOldLabels(); toggleItemFields(); toggleStockType(); renderOrders(); updateDashboard(); loadInvoiceOrders(); renderMultiOrders(); renderInvoiceHistory(); renderStockEvents(); updateRemainingStock(); renderResellOrders(); renderLedger(); addBillRow(); 
+    window.history.replaceState({ pageId: 'homePage' }, "", "#homePage");
+};
+</script>  
+</body>  
+</html>
