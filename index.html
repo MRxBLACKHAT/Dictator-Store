@@ -83,8 +83,17 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
         <button class="action-btn btn-black" onclick="showPage('ledgerPage')"><span class="material-icons" style="font-size:20px; vertical-align:middle;">menu_book</span> Ledger</button>
         <button class="action-btn" style="background-color:#14b8a6; color:#fff; grid-column: span 2; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="showPage('accountsManagerPage')"><span class="material-icons">manage_accounts</span> Accounts Manager</button>  
     </div>  
+    
+    <!-- SYSTEM DATA RESET BUTTONS -->
     <div class="card" style="margin-top: 20px;">
-        <button class="save-btn" style="background-color: var(--danger); display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="resetMonthData()"><span class="material-icons">restart_alt</span> Reset Monthly Data</button>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <button class="save-btn" style="background-color: var(--warning); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="resetMonthData()">
+                <span class="material-icons">restart_alt</span> Reset Monthly Data
+            </button>
+            <button class="save-btn" style="background-color: var(--danger); display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="factoryReset()">
+                <span class="material-icons">delete_forever</span> Factory Reset (Wipe All Data)
+            </button>
+        </div>
     </div>
 
     <!-- REFACTORED CLICKABLE TEXT-BASED BACKUP & RESTORE CARD -->
@@ -1316,6 +1325,18 @@ function restoreTextBackup() {
 }
 
 function resetMonthData(){ if(confirm("DANGER! This deletes ALL orders, resell records, and invoices. Continue?")){ orders = []; resellOrders = []; invoices = []; localStorage.setItem("des_orders", JSON.stringify([])); localStorage.setItem("des_resell_orders", JSON.stringify([])); localStorage.setItem("des_invoices", JSON.stringify([])); renderOrders(); renderResellOrders(); renderInvoiceHistory(); renderLedger(); updateDashboard(); loadInvoiceOrders(); renderMultiOrders(); alert("System Data Reset Successful."); } }
+
+function factoryReset() { 
+    if(confirm("🛑 DANGER: TOTAL FACTORY RESET 🛑\n\nThis will permanently delete ALL orders, ALL stock, ALL invoices, and ALL account vaults.\n\nEverything will go back to 0. Are you 100% sure?")) { 
+        if(confirm("FINAL WARNING! There is no undo. Click OK to wipe all data.")) { 
+            const dm = localStorage.getItem("des_dark_mode"); 
+            localStorage.clear(); 
+            if(dm) localStorage.setItem("des_dark_mode", dm); 
+            alert("All data wiped successfully. The app will now reload."); 
+            location.reload(); 
+        } 
+    } 
+}
   
 window.onload = function() {  
     if (localStorage.getItem("des_dark_mode") === "true") { document.body.classList.add("dark-mode"); document.getElementById("darkModeIcon").innerText = "light_mode"; document.getElementById("darkModeText").innerText = "Disable Dark Mode"; }
