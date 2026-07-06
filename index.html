@@ -86,6 +86,29 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
     <div class="card" style="margin-top: 20px;">
         <button class="save-btn" style="background-color: var(--danger); display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="resetMonthData()"><span class="material-icons">restart_alt</span> Reset Monthly Data</button>
     </div>
+
+    <div class="card" style="border: 2px solid var(--warning); margin-top: 20px;">
+        <h3 style="color:var(--warning); display:flex; align-items:center; gap:8px;">
+            <span class="material-icons">backup</span> App-Safe Backup
+        </h3>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px; font-style:italic;">
+            *Since file downloads are blocked inside wrapped apps, use this text-based copy/paste method instead.
+        </p>
+        
+        <div class="form-group">
+            <label style="font-size:12px;">Backup Data String</label>
+            <textarea id="backupTextArea" rows="4" placeholder="Your backup string will appear here, or paste a backup string here to restore..." style="width:100%; border:1px solid var(--border); border-radius:14px; padding:12px; font-family:monospace; font-size:11px; background-color:var(--bg-color); color:var(--text-color); resize:vertical;"></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button class="action-btn btn-dark" style="flex:1; padding:12px; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="generateTextBackup()">
+                <span class="material-icons" style="font-size:18px;">content_copy</span> Copy
+            </button>
+            <button class="action-btn" style="flex:1; background-color:var(--warning); color:white; padding:12px; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="restoreTextBackup()">
+                <span class="material-icons" style="font-size:18px;">settings_backup_restore</span> Restore
+            </button>
+        </div>
+    </div>
     <h3 style="margin-top:24px; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">history</span> Recent Orders</h3>  
     <div id="recentOrders"></div>  
     <button class="action-btn btn-dark" style="width: 100%; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px;" onclick="toggleDarkMode()"><span class="material-icons" id="darkModeIcon">dark_mode</span><span id="darkModeText">Enable Dark Mode</span></button>
@@ -1226,6 +1249,62 @@ function renderLedger() {
 }
 
 function viewCustomerOrders(n) { document.getElementById("customerOrdersTitle").innerText = n; const c = document.getElementById("customerOrdersContainer"); c.innerHTML = ""; const ord = orders.filter(o => o.customer === n).reverse(); if(ord.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No direct orders.</div>`; } else { ord.forEach(o => { const b = o.status === "Paid" ? "var(--success)" : "var(--warning)", bg = o.status === "Paid" ? "rgba(22, 163, 74, 0.1)" : "rgba(245, 158, 11, 0.1)"; c.innerHTML += `<div class="order-card" style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><div class="order-id" style="font-size:11px; padding:4px 8px;">${o.id}</div><div style="font-size:14px; font-weight:700; margin-top:8px;">${o.item}</div><div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${o.details}</div></div><div style="text-align:right;"><div style="font-size:16px; font-weight:800;">₹${o.amount.toLocaleString()}</div><div style="font-size:10px; font-weight:700; color:${b}; background-color:${bg}; padding:4px 8px; border-radius:6px; display:inline-block; margin-top:6px; text-transform:uppercase;">${o.status}</div></div></div><div style="font-size:11px; color:var(--text-muted); margin-top:10px; border-top:1px solid var(--border); padding-top:8px;">${o.date}</div></div>`; }); } showPage('customerOrdersPage'); }
+
+// --- GENERATE TEXT BACKUP ---
+function generateTextBackup() {
+    const backup = {
+        des_orders: localStorage.getItem("des_orders"),
+        des_stock_events: localStorage.getItem("des_stock_events"),
+        des_invoices: localStorage.getItem("des_invoices"),
+        des_resell_orders: localStorage.getItem("des_resell_orders"),
+        des_pop_labels: localStorage.getItem("des_pop_labels"),
+        des_hv_labels: localStorage.getItem("des_hv_labels"),
+        des_acc_labels: localStorage.getItem("des_acc_labels")
+    };
+    
+    // Encode the data to make it a clean, copyable text block
+    const backupString = btoa(unescape(encodeURIComponent(JSON.stringify(backup)))); 
+    
+    const txtArea = document.getElementById("backupTextArea");
+    txtArea.value = backupString;
+    txtArea.select();
+    txtArea.setSelectionRange(0, 99999); // Ensures mobile devices highlight everything
+    
+    try {
+        navigator.clipboard.writeText(backupString);
+        alert("Backup generated and automatically copied to your clipboard! Paste and save it in your Notes app or WhatsApp immediately.");
+    } catch (err) {
+        alert("Backup generated! Please manually long-press the text box above, select 'Copy All', and save it somewhere safe.");
+    }
+}
+
+// --- RESTORE TEXT BACKUP ---
+function restoreTextBackup() {
+    const txtArea = document.getElementById("backupTextArea");
+    let rawInput = txtArea.value.trim();
+    
+    if(!rawInput) return alert("Please paste your backup text string into the box first.");
+    if(!confirm("Warning: This will overwrite your current app data. Proceed?")) return;
+    
+    try {
+        // Decode the text string back into usable JSON data
+        let decoded = decodeURIComponent(escape(atob(rawInput)));
+        const data = JSON.parse(decoded);
+        
+        if (data.des_orders) localStorage.setItem("des_orders", data.des_orders);
+        if (data.des_stock_events) localStorage.setItem("des_stock_events", data.des_stock_events);
+        if (data.des_invoices) localStorage.setItem("des_invoices", data.des_invoices);
+        if (data.des_resell_orders) localStorage.setItem("des_resell_orders", data.des_resell_orders);
+        if (data.des_pop_labels) localStorage.setItem("des_pop_labels", data.des_pop_labels);
+        if (data.des_hv_labels) localStorage.setItem("des_hv_labels", data.des_hv_labels);
+        if (data.des_acc_labels) localStorage.setItem("des_acc_labels", data.des_acc_labels);
+        
+        alert("Data successfully restored! Reopening dashboard...");
+        location.reload();
+    } catch (err) {
+        alert("Error: Invalid backup text string. Make sure you pasted the entire code block without missing any characters.");
+    }
+}
 
 function resetMonthData(){ if(confirm("DANGER! This deletes ALL orders, resell records, and invoices. Continue?")){ orders = []; resellOrders = []; invoices = []; localStorage.setItem("des_orders", JSON.stringify([])); localStorage.setItem("des_resell_orders", JSON.stringify([])); localStorage.setItem("des_invoices", JSON.stringify([])); renderOrders(); renderResellOrders(); renderInvoiceHistory(); renderLedger(); updateDashboard(); loadInvoiceOrders(); renderMultiOrders(); alert("System Data Reset Successful."); } }
   
