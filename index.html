@@ -373,6 +373,28 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
 
 <div id="heliVaultPage" class="page">
     <div class="header" style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('stockPage')"><span class="material-icons">arrow_back</span></button><h2 style="margin:0; color:var(--warning);">Heli Accounts Vault</h2></div>
+    
+    <div style="display:flex; gap:10px; margin-bottom: 20px;">
+        <button class="action-btn" style="background-color:var(--warning); color:#fff; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="toggleHeliInjectCard()"><span class="material-icons">add_box</span> Add Stock</button>
+    </div>
+
+    <div class="card" id="quickHeliInjectCard" style="display:none; border: 2px solid var(--warning); margin-bottom: 20px; background: linear-gradient(145deg, var(--card-bg), rgba(245, 158, 11, 0.02));">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="color:var(--warning); margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">flight_takeoff</span> Quick Inject Heli</h3>
+            <button class="menu-btn" onclick="toggleHeliInjectCard()"><span class="material-icons">close</span></button>
+        </div>
+        <div class="stats-grid" style="margin-bottom: 12px;">
+            <div class="form-group" style="margin:0;"><label style="font-size:12px;">Account / ID Name</label><input id="quickHeliId" placeholder="Main ID"></div>
+            <div class="form-group" style="margin:0;"><label style="font-size:12px;">No. of Helicopters</label><input type="number" id="quickHeliCount" placeholder="0"></div>
+        </div>
+        <button class="save-btn" style="background-color:var(--warning); color:#fff; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px;" onclick="addHeliDirectly()"><span class="material-icons">add</span> Inject Directly</button>
+    </div>
+    
+    <div class="card" style="border: 1px solid var(--warning); margin-bottom: 20px;">
+        <h3 style="color:var(--warning); margin-top:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">radar</span> Active Heli Holders</h3>
+        <div id="activeHeliHoldersList"></div>
+    </div>
+
     <div id="heliLabelsList"></div>
 </div>
 
@@ -1174,11 +1196,9 @@ function renderStockEvents(){
         let badge = item.injectedToLabels ? `<span style="font-size:10px; color:var(--success); background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px; margin-left:8px; vertical-align:middle;">INJECTED</span>` : (item.vaultSynced ? `<span style="font-size:10px; color:var(--primary); background:rgba(37, 99, 235, 0.1); padding:2px 6px; border-radius:4px; margin-left:8px; vertical-align:middle;">DEDUCTED</span>` : "");
         
         if (item.type.includes("Helicopters") && item.injectedToLabels === undefined && item.vaultSynced === undefined) {
-            // Legacy single heli event logic
             clr = "var(--warning)"; bg = "rgba(245, 158, 11, 0.1)";
             sHtml = `<div style="font-size:12px; color:var(--text-muted);">Account ID</div><div style="font-size:18px; font-weight:800; margin-bottom:10px;">${item.idName || item.event}</div><div style="display:flex; justify-content:space-between; align-items:center; background-color:var(--bg-color); padding:12px; border-radius:10px;"><span style="font-weight:600;">Helicopters</span><b style="color:var(--warning); font-size:20px;">${item.heliCount}</b></div>`;
         } else {
-            // Standard volume formatting for Pop, HV, and New Label-based Helis
             if(item.type.includes("Home Votes")) { clr = "var(--success)"; bg = "rgba(22, 163, 74, 0.1)"; }
             if(item.type.includes("Helicopters")) { clr = "var(--warning)"; bg = "rgba(245, 158, 11, 0.1)"; }
             
@@ -1298,9 +1318,79 @@ function deleteHVLabelGroup(i) {
         updateRemainingStock();
     }
 }
-function renderHVLabels() { const c = document.getElementById("hvLabelsList"); c.innerHTML = ""; if (hvLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } let tA = 0; hvLabelGroups.forEach(g => tA += g.accounts.length); c.innerHTML += `<div style="background-color: rgba(22, 163, 74, 0.05); border: 1px dashed var(--success); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--success);">${hvLabelGroups.length}</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; hvLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewHVGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--success);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(22, 163, 74, 0.1); color: var(--success); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="hv-group-total-${i}">${formatStockValue(g.total || 0)}</span></div><button class="menu-btn" onclick="deleteHVLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); }
+function renderHVLabels() { const c = document.getElementById("hvLabelsList"); c.innerHTML = ""; if (hvLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } let tA = 0; hvLabelGroups.forEach(g => tA += g.accounts.length); c.innerHTML += `<div style="background-color: rgba(22, 163, 74, 0.05); border: 1px dashed var(--success); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--success);">${hvLabelGroups.length} Labels</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; hvLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewHVGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--success);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(22, 163, 74, 0.1); color: var(--success); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="hv-group-total-${i}">${formatStockValue(g.total || 0)}</span></div><button class="menu-btn" onclick="deleteHVLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); }
 
 function openHeliVault() { renderHeliLabels(); showPage('heliVaultPage'); }
+
+function toggleHeliInjectCard() {
+    const c = document.getElementById("quickHeliInjectCard");
+    c.style.display = c.style.display === "none" ? "block" : "none";
+}
+
+function renderActiveHeliHolders() {
+    const c = document.getElementById("activeHeliHoldersList");
+    c.innerHTML = "";
+    let holders = [];
+    
+    // 1. From Label Vaults
+    heliLabelGroups.forEach(g => {
+        g.accounts.forEach(a => {
+            if (a.heli && a.heli > 0) {
+                holders.push({ name: a.name, count: a.heli, label: g.label });
+            }
+        });
+    });
+    
+    // 2. From Manual External Stock Events
+    let extMap = new Map();
+    stockEvents.forEach(e => {
+        if (e.type === "Helicopters" && e.injectedToLabels === undefined && e.vaultSynced === undefined) {
+            if (e.heliCount !== 0) {
+                let current = extMap.get(e.idName || e.event) || 0;
+                extMap.set(e.idName || e.event, current + e.heliCount);
+            }
+        }
+    });
+    extMap.forEach((count, name) => {
+        if (count > 0) holders.push({ name: name, count: count, label: "External / Manual" });
+    });
+
+    if (holders.length === 0) {
+        c.innerHTML = `<div style="font-size:12px; color:var(--text-muted); font-style:italic; text-align:center; padding:10px 0;">No active helicopters available.</div>`;
+        return;
+    }
+    
+    holders.sort((a,b) => b.count - a.count);
+    
+    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    holders.forEach(h => {
+        html += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:10px 12px; border-radius:10px; border:1px solid var(--border);">
+            <div>
+                <div style="font-weight:700; font-size:14px; color:var(--text-color);">${h.name}</div>
+                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">${h.label}</div>
+            </div>
+            <div style="font-size:16px; font-weight:900; color:var(--warning); display:flex; align-items:center; gap:4px;">${h.count} <span class="material-icons" style="font-size:14px;">flight_takeoff</span></div>
+        </div>`;
+    });
+    html += '</div>';
+    c.innerHTML = html;
+}
+
+function addHeliDirectly() {
+    const idN = document.getElementById("quickHeliId").value.trim();
+    const hCnt = Number(document.getElementById("quickHeliCount").value || 0);
+    if (!idN || !hCnt) { alert("Please enter both the Account ID and a valid item count."); return; }
+    stockEvents.push({ type: "Helicopters", event: idN, idName: idN, heliCount: hCnt });
+    localStorage.setItem("des_stock_events", JSON.stringify(stockEvents));
+    document.getElementById("quickHeliId").value = "";
+    document.getElementById("quickHeliCount").value = "";
+    
+    toggleHeliInjectCard();
+    renderHeliLabels();
+    updateRemainingStock();
+    renderStockEvents();
+}
+
 function saveHeliLabels() { localStorage.setItem("des_heli_labels", JSON.stringify(heliLabelGroups)); renderHeliLabels(); renderHeliLabelCheckboxes(); }
 function viewHeliGroup(idx) { currentHeliGroupIndex = idx; const g = heliLabelGroups[idx]; document.getElementById("heliGroupDetailsTitle").innerText = g.label; document.getElementById("activeHeliGroupTotal").innerText = g.total || 0; renderHeliGroupAccounts(); showPage('heliGroupDetailsPage'); }
 function closeHeliGroupDetails() { currentHeliGroupIndex = null; document.getElementById("heliAccountSearch").value = ""; document.getElementById("heliModifyMultipleCard").style.display = "none"; renderHeliLabels(); showPage('heliVaultPage'); }
@@ -1318,7 +1408,24 @@ function deleteHeliLabelGroup(i) {
         updateRemainingStock();
     }
 }
-function renderHeliLabels() { const c = document.getElementById("heliLabelsList"); c.innerHTML = ""; if (heliLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } let tA = 0; heliLabelGroups.forEach(g => tA += g.accounts.length); c.innerHTML += `<div style="background-color: rgba(245, 158, 11, 0.05); border: 1px dashed var(--warning); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--warning);">${heliLabelGroups.length}</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; heliLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewHeliGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--warning);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="heli-group-total-${i}">${g.total || 0}</span></div><button class="menu-btn" onclick="deleteHeliLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); }
+function renderHeliLabels() { 
+    const c = document.getElementById("heliLabelsList"); 
+    c.innerHTML = ""; 
+    
+    renderActiveHeliHolders();
+    
+    if (heliLabelGroups.length === 0) { 
+        c.innerHTML += `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; 
+        return; 
+    } 
+    
+    let tA = 0; heliLabelGroups.forEach(g => tA += g.accounts.length); 
+    c.innerHTML += `<div style="background-color: rgba(245, 158, 11, 0.05); border: 1px dashed var(--warning); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--warning);">${heliLabelGroups.length} Labels</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; 
+    
+    heliLabelGroups.forEach((g, i) => { 
+        c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewHeliGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--warning);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="heli-group-total-${i}">${g.total || 0}</span></div><button class="menu-btn" onclick="deleteHeliLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; 
+    }); 
+}
 
 
 function openGoldVault() { renderGoldLabels(); showPage('goldVaultPage'); }
