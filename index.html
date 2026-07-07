@@ -160,6 +160,26 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
             <span class="material-icons" id="levelVaultIcon" style="color:var(--text-muted); transition: transform 0.3s ease;">expand_more</span>
         </div>
         <div id="levelVaultContent" style="display: none; margin-top: 15px;">
+            <!-- New Levels Stats Grid -->
+            <div class="stats-grid" style="margin-bottom: 15px;">
+                <div class="stat-card" style="border-top: 3px solid var(--text-muted); padding: 12px;">
+                    <div class="stat-title" style="font-size: 11px;">Below 10</div>
+                    <div class="stat-value" id="statLevelBelow10" style="color: var(--text-muted); font-size: 20px; margin-top: 4px;">0</div>
+                </div>
+                <div class="stat-card" style="border-top: 3px solid var(--primary); padding: 12px;">
+                    <div class="stat-title" style="font-size: 11px;">Level 10+</div>
+                    <div class="stat-value" id="statLevel10" style="color: var(--primary); font-size: 20px; margin-top: 4px;">0</div>
+                </div>
+                <div class="stat-card" style="border-top: 3px solid var(--success); padding: 12px;">
+                    <div class="stat-title" style="font-size: 11px;">Level 25+</div>
+                    <div class="stat-value" id="statLevel25" style="color: var(--success); font-size: 20px; margin-top: 4px;">0</div>
+                </div>
+                <div class="stat-card" style="border-top: 3px solid var(--level); padding: 12px;">
+                    <div class="stat-title" style="font-size: 11px;">Level 30+</div>
+                    <div class="stat-value" id="statLevel30" style="color: var(--level); font-size: 20px; margin-top: 4px;">0</div>
+                </div>
+            </div>
+            
             <div id="levelLabelsList"></div>
         </div>
     </div>
@@ -407,7 +427,18 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
 </div>
 
 <div id="goldVaultPage" class="page">
-    <div class="header" style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('stockPage')"><span class="material-icons">arrow_back</span></button><h2 style="margin:0; color:var(--gold);">Gold Accounts Vault</h2></div>
+    <div class="header" style="display:flex; align-items:center; gap:15px;">
+        <button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('stockPage')"><span class="material-icons">arrow_back</span></button>
+        <h2 style="margin:0; color:var(--gold);">Gold Accounts Vault</h2>
+    </div>
+    
+    <div class="card" style="border: 2px solid var(--gold); background: linear-gradient(145deg, var(--card-bg), rgba(234, 179, 8, 0.05)); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="color:var(--gold); margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">stars</span> Total Gold Accounts</h3>
+            <div style="font-size: 28px; font-weight: 900; color: var(--gold);" id="vaultTotalGoldStats">0</div>
+        </div>
+    </div>
+    
     <div id="goldLabelsList"></div>
 </div>
 
@@ -582,6 +613,17 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
         
         <div id="sendableDetailsList" style="max-height: 50vh; overflow-y: auto; padding-right: 5px;">
             </div>
+    </div>
+</div>
+
+<!-- Dynamic Vault Content Asset Breakdown Modal -->
+<div id="vaultBreakdownModal" class="invoice-modal">
+    <div class="invoice-modal-content" style="max-width: 500px; padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 id="vaultBreakdownModalTitle" style="margin:0; display:flex; align-items:center; gap:8px;">Stock Breakdown</h3>
+            <button class="menu-btn" onclick="closeVaultBreakdownModal()"><span class="material-icons">close</span></button>
+        </div>
+        <div id="vaultBreakdownModalList" style="max-height: 50vh; overflow-y: auto; padding-right: 5px;"></div>
     </div>
 </div>
 
@@ -1315,7 +1357,26 @@ function deletePopLabelGroup(i) {
         updateRemainingStock();
     }
 }
-function renderPopLabels() { const c = document.getElementById("popLabelsList"); c.innerHTML = ""; if (popLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } let tA = 0; popLabelGroups.forEach(g => tA += g.accounts.length); c.innerHTML += `<div style="background-color: rgba(37, 99, 235, 0.05); border: 1px dashed var(--primary); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total Labels :-</span><span style="font-size:14px; font-weight:800; color:var(--primary);">${popLabelGroups.length}</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; popLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewPopGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--primary);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(37, 99, 235, 0.1); color: var(--primary); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="pop-group-total-${i}">${formatStockValue(g.total || 0)}</span></div><button class="menu-btn" onclick="deletePopLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); }
+function renderPopLabels() { 
+    const c = document.getElementById("popLabelsList"); c.innerHTML = ""; 
+    if (popLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } 
+    let tA = 0; let accountsWithPop = 0;
+    popLabelGroups.forEach(g => { 
+        tA += g.accounts.length;
+        g.accounts.forEach(a => {
+            if (a.pop && a.pop > 0) accountsWithPop++;
+        });
+    }); 
+    c.innerHTML += `<div style="background-color: rgba(37, 99, 235, 0.05); border: 1px dashed var(--primary); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total Labels :-</span><span style="font-size:14px; font-weight:800; color:var(--primary);">${popLabelGroups.length}</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div>
+        <div style="display:flex; justify-content:space-between; border-top: 1px dashed rgba(37, 99, 235, 0.2); padding-top: 6px; margin-top: 6px; cursor: pointer;" onclick="showVaultBreakdown('pop')">
+            <span style="font-size:13px; font-weight:700; color:var(--text-muted); display:flex; align-items:center; gap:4px;">Accounts with pop <span class="material-icons" style="font-size:14px; color:var(--primary);">touch_app</span></span>
+            <span style="font-size:14px; font-weight:800; color:var(--primary);">${accountsWithPop}</span>
+        </div>
+    </div>`; 
+    popLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewPopGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--primary);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(37, 99, 235, 0.1); color: var(--primary); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="pop-group-total-${i}">${formatStockValue(g.total || 0)}</span></div><button class="menu-btn" onclick="deletePopLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); 
+}
 
 function openHVVault() { renderHVLabels(); showPage('hvVaultPage'); }
 function saveHVLabels() { localStorage.setItem("des_hv_labels", JSON.stringify(hvLabelGroups)); renderHVLabels(); renderHVLabelCheckboxes(); }
@@ -1338,7 +1399,26 @@ function deleteHVLabelGroup(i) {
         updateRemainingStock();
     }
 }
-function renderHVLabels() { const c = document.getElementById("hvLabelsList"); c.innerHTML = ""; if (hvLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } let tA = 0; hvLabelGroups.forEach(g => tA += g.accounts.length); c.innerHTML += `<div style="background-color: rgba(22, 163, 74, 0.05); border: 1px dashed var(--success); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;"><div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--success);">${hvLabelGroups.length} Labels</span></div><div style="display:flex; justify-content:space-between;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div></div>`; hvLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewHVGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--success);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(22, 163, 74, 0.1); color: var(--success); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="hv-group-total-${i}">${formatStockValue(g.total || 0)}</span></div><button class="menu-btn" onclick="deleteHVLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); }
+function renderHVLabels() { 
+    const c = document.getElementById("hvLabelsList"); c.innerHTML = ""; 
+    if (hvLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No groups yet.</div>`; return; } 
+    let tA = 0; let accountsWithHV = 0;
+    hvLabelGroups.forEach(g => {
+        tA += g.accounts.length;
+        g.accounts.forEach(a => {
+            if (a.hv && a.hv > 0) accountsWithHV++;
+        });
+    });
+    c.innerHTML += `<div style="background-color: rgba(22, 163, 74, 0.05); border: 1px dashed var(--success); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--success);">${hvLabelGroups.length} Labels</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span style="font-size:13px; font-weight:700; color:var(--text-muted);">Total accounts :-</span><span style="font-size:14px; font-weight:800;">${tA}</span></div>
+        <div style="display:flex; justify-content:space-between; border-top: 1px dashed rgba(22, 163, 74, 0.2); padding-top: 6px; margin-top: 6px; cursor: pointer;" onclick="showVaultBreakdown('hv')">
+            <span style="font-size:13px; font-weight:700; color:var(--text-muted); display:flex; align-items:center; gap:4px;">Accounts with home votes <span class="material-icons" style="font-size:14px; color:var(--success);">touch_app</span></span>
+            <span style="font-size:14px; font-weight:800; color:var(--success);">${accountsWithHV}</span>
+        </div>
+    </div>`; 
+    hvLabelGroups.forEach((g, i) => { c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;" ><div style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer;" onclick="viewHVGroup(${i})"><span style="font-weight: 800; font-size: 15px; color:var(--success);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(22, 163, 74, 0.1); color: var(--success); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span id="hv-group-total-${i}">${formatStockValue(g.total || 0)}</span></div><button class="menu-btn" onclick="deleteHVLabelGroup(${i})" title="Clear Values" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button></div></div></div>`; }); 
+}
 
 function openHeliVault() { renderHeliLabels(); showPage('heliVaultPage'); }
 
@@ -1449,7 +1529,17 @@ function renderHeliLabels() {
 
 
 function openGoldVault() { renderGoldLabels(); showPage('goldVaultPage'); }
-function renderGoldLabels() { const c = document.getElementById("goldLabelsList"); c.innerHTML = ""; if (accLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No labels yet.</div>`; return; } accLabelGroups.forEach((g, i) => { let gC = 0; g.accounts.forEach(a => { if(a.isGold) gC++; }); c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer;" onclick="viewGoldGroup(${i})"><div style="display:flex; align-items:center; gap:10px; flex:1;"><span style="font-weight: 800; font-size: 15px; color:var(--gold);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(234, 179, 8, 0.1); color: var(--gold); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;">${gC} <span class="material-icons" style="font-size:14px; vertical-align:middle;">stars</span></div></div></div></div>`; }); }
+function renderGoldLabels() { 
+    const c = document.getElementById("goldLabelsList"); c.innerHTML = ""; let tG = 0; 
+    if (accLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No labels yet.</div>`; } 
+    else {
+        accLabelGroups.forEach((g, i) => { 
+            let gC = 0; g.accounts.forEach(a => { if(a.isGold) { gC++; tG++; } }); 
+            c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer;" onclick="viewGoldGroup(${i})"><div style="display:flex; align-items:center; gap:10px; flex:1;"><span style="font-weight: 800; font-size: 15px; color:var(--gold);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${g.accounts.length} accs</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(234, 179, 8, 0.1); color: var(--gold); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;">${gC} <span class="material-icons" style="font-size:14px; vertical-align:middle;">stars</span></div></div></div></div>`; 
+        });
+    }
+    if (document.getElementById("vaultTotalGoldStats")) document.getElementById("vaultTotalGoldStats").innerText = tG; 
+}
 function viewGoldGroup(i) { currentGoldGroupIndex = i; document.getElementById("goldGroupDetailsTitle").innerText = accLabelGroups[i].label; renderGoldGroupAccounts(); showPage('goldGroupDetailsPage'); }
 function closeGoldGroupDetails() { currentGoldGroupIndex = null; document.getElementById("goldAccountSearch").value = ""; document.getElementById("goldModifyMultipleCard").style.display = "none"; renderGoldLabels(); showPage('goldVaultPage'); }
 function filterGoldAccounts() { const q = document.getElementById("goldAccountSearch").value.toLowerCase(); document.querySelectorAll(".gold-account-item").forEach(i => { i.style.display = i.querySelector(".gold-account-name-label").innerText.toLowerCase().includes(q) ? "block" : "none"; }); }
@@ -1460,7 +1550,25 @@ function applyGoldModifyMultiple() { if(currentGoldGroupIndex === null) return; 
 function renderGoldGroupAccounts() { if(currentGoldGroupIndex === null) return; const gI = currentGoldGroupIndex, g = accLabelGroups[gI], c = document.getElementById("goldGroupAccountsContainer"); c.innerHTML = ""; let gc = 0, h = `<div style="display:flex; flex-direction:column; gap:12px;">`; g.accounts.forEach((a, aI) => { if(a.isGold) gc++; h += `<div class="gold-account-item card" style="padding:15px; border-radius:16px; margin-bottom:0;"><label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; width:100%; margin:0;"><div style="display:flex; align-items:center; gap:12px;"><input type="checkbox" onchange="toggleSingleGold(${gI}, ${aI}, this.checked)" ${a.isGold ? 'checked' : ''} style="width:22px; height:22px; accent-color:var(--gold); margin:0; cursor:pointer;"><div class="gold-account-name-label" style="font-size:16px; font-weight:800;">${a.name}</div></div>${a.isGold ? `<span class="material-icons" style="color:var(--gold);">stars</span>` : `<span class="material-icons" style="color:var(--text-muted); opacity:0.3;">star_outline</span>`}</label></div>`; }); h += `</div>`; c.innerHTML = h; document.getElementById("activeGroupGoldCount").innerText = gc; }
 
 function toggleLevelManager() { const c = document.getElementById("levelManagerCard"); const wc = (c.style.display === "none" || c.style.display === ""); if (wc) { c.style.display = "block"; c.style.animation = "fadeInDrop 0.2s ease forwards"; renderLevelLabels(); } else { c.style.display = "none"; } }
-function renderLevelLabels() { const c = document.getElementById("levelLabelsList"); c.innerHTML = ""; if (accLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No labels yet.</div>`; return; } accLabelGroups.forEach((g, i) => { const aC = g.accounts.length; c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer;" onclick="viewLevelGroup(${i})"><div style="display:flex; align-items:center; gap:10px; flex:1;"><span style="font-weight: 800; font-size: 15px; color:var(--level);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${aC} accounts</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(139, 92, 246, 0.1); color: var(--level); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align:middle;">tune</span> Set</div></div></div></div>`; }); }
+function renderLevelLabels() { 
+    const c = document.getElementById("levelLabelsList"); c.innerHTML = ""; 
+    let lB = 0, l10 = 0, l25 = 0, l30 = 0;
+    if (accLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No labels yet.</div>`; } 
+    else {
+        accLabelGroups.forEach((g, i) => { 
+            const aC = g.accounts.length; 
+            g.accounts.forEach(a => {
+                const l = a.level || "Below 10 level";
+                if (l === "Level 30+") l30++; else if (l === "Level 25+") l25++; else if (l === "Level 10+") l10++; else lB++;
+            });
+            c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer;" onclick="viewLevelGroup(${i})"><div style="display:flex; align-items:center; gap:10px; flex:1;"><span style="font-weight: 800; font-size: 15px; color:var(--level);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${aC} accounts</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(139, 92, 246, 0.1); color: var(--level); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align:middle;">tune</span> Set</div></div></div></div>`; 
+        }); 
+    }
+    if(document.getElementById("statLevelBelow10")) document.getElementById("statLevelBelow10").innerText = lB;
+    if(document.getElementById("statLevel10")) document.getElementById("statLevel10").innerText = l10;
+    if(document.getElementById("statLevel25")) document.getElementById("statLevel25").innerText = l25;
+    if(document.getElementById("statLevel30")) document.getElementById("statLevel30").innerText = l30;
+}
 function viewLevelGroup(i) { currentLevelGroupIndex = i; document.getElementById("levelGroupDetailsTitle").innerText = accLabelGroups[i].label; renderLevelGroupAccounts(); showPage('levelGroupDetailsPage'); }
 function closeLevelGroupDetails() { currentLevelGroupIndex = null; document.getElementById("levelAccountSearch").value = ""; document.getElementById("levelModifyMultipleCard").style.display = "none"; renderLevelLabels(); showPage('accountsManagerPage'); }
 function filterLevelAccounts() { const q = document.getElementById("levelAccountSearch").value.toLowerCase(); document.querySelectorAll(".level-account-item").forEach(i => { i.style.display = i.querySelector(".level-account-name-label").innerText.toLowerCase().includes(q) ? "block" : "none"; }); }
@@ -1478,7 +1586,6 @@ function filterAccAccounts() { const q = document.getElementById("accSearch").va
 function addAccountToAccGroup() { if(currentAccGroupIndex === null) return; const gI = currentAccGroupIndex, g = accLabelGroups[gI]; let n = prompt("Enter new account name (This will sync to all Vaults):", g.baseName ? generateSmartName(g.baseName, g.accounts.length + 1) : g.label + " " + (g.accounts.length + 1)); if(!n || !n.trim()) return; n = n.trim(); while(g.accounts.find(a => a.name.toLowerCase() === n.toLowerCase())) n += " *"; g.accounts.push({ name: n, x_username: '', email: '', isGold: false, level: 'Below 10 level' }); g.accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveAccLabels(); if (popLabelGroups[gI]) { popLabelGroups[gI].accounts.push({ name: n, counts: { "1500": '', "600": '', "400": '', "200": '' }, pop: 0, isGold: false, level: 'Below 10 level' }); popLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); savePopLabels(); } if (hvLabelGroups[gI]) { hvLabelGroups[gI].accounts.push({ name: n, cards: '', hv: 0, isGold: false, level: 'Below 10 level' }); hvLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveHVLabels(); } if (heliLabelGroups[gI]) { heliLabelGroups[gI].accounts.push({ name: n, heli: 0, isGold: false, level: 'Below 10 level' }); heliLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveHeliLabels(); } renderAccGroupAccounts(); if(document.getElementById("accModifyMultipleCard").style.display === "block") openAccModifyMultiple(); }
 function openAccModifyMultiple() { if(currentAccGroupIndex === null) return; const g = accLabelGroups[currentAccGroupIndex], fSel = document.getElementById("accModFrom"), tSel = document.getElementById("accModTo"); fSel.innerHTML = ""; tSel.innerHTML = ""; g.accounts.forEach((a, i) => { fSel.innerHTML += `<option value="${i}">${a.name}</option>`; tSel.innerHTML += `<option value="${i}">${a.name}</option>`; }); document.getElementById("accModifyMultipleCard").style.display = "block"; document.getElementById("modAccUsername").value = ""; document.getElementById("modAccEmail").value = ""; document.getElementById("accModifyMultipleCard").scrollIntoView({ behavior: "smooth", block: "start" }); }
 function closeAccModifyMultiple() { document.getElementById("accModifyMultipleCard").style.display = "none"; }
-function applyAccModifyMultiple() { if(currentAccGroupIndex === null) return; const f = parseInt(document.getElementById("accModFrom").value), t = parseInt(document.getElementById("accModTo").value), bU = document.getElementById("modAccUsername").value.trim(), bE = document.getElementById("modAccEmail").value.trim(); if (bU === "" && bE === "") return closeAccModifyMultiple(); const g = accLabelGroups[currentAccGroupIndex]; for(let i = Math.min(f, t); i <= Math.max(f, t); i++) { const o = i - Math.min(f, t); if (bU !== "") g.accounts[i].x_username = parseAndIncrement(bU, o); if (bE !== "") g.accounts[i].email = parseAndIncrement(bE, o); } saveAccLabels(); renderAccGroupAccounts(); closeAccModifyMultiple(); filterAccAccounts(); }
 function renameSingleAcc(gI, aI) {
     const oldName = accLabelGroups[gI].accounts[aI].name;
     let newName = prompt("Enter new name for account:", oldName);
@@ -1806,6 +1913,57 @@ function showSendableDetails(type) {
 
 function closeSendableDetailsModal() {
     document.getElementById("sendableDetailsModal").classList.remove("show");
+}
+
+// --- VAULT ASSET COUNTER BREAKDOWN MODAL LOGIC ---
+function showVaultBreakdown(type) {
+    const c = document.getElementById("vaultBreakdownModalList");
+    const t = document.getElementById("vaultBreakdownModalTitle");
+    c.innerHTML = "";
+    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    let itemsList = [];
+    
+    if (type === 'pop') {
+        t.innerHTML = `<span class="material-icons" style="color:var(--primary);">analytics</span> Accounts with Pop`;
+        popLabelGroups.forEach(g => {
+            g.accounts.forEach(a => {
+                if (a.pop && a.pop > 0) {
+                    itemsList.push({ name: a.name, label: g.label, displayVal: formatStockValue(a.pop), rawVal: a.pop, color: 'var(--primary)' });
+                }
+            });
+        });
+    } else if (type === 'hv') {
+        t.innerHTML = `<span class="material-icons" style="color:var(--success);">analytics</span> Accounts with HV`;
+        hvLabelGroups.forEach(g => {
+            g.accounts.forEach(a => {
+                if (a.hv && a.hv > 0) {
+                    itemsList.push({ name: a.name, label: g.label, displayVal: formatStockValue(a.hv), rawVal: a.hv, color: 'var(--success)' });
+                }
+            });
+        });
+    }
+    
+    if (itemsList.length === 0) {
+        c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No active stock quantities found.</div>`;
+    } else {
+        itemsList.sort((a, b) => b.rawVal - a.rawVal); // Sort by highest quantity first
+        itemsList.forEach(item => {
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:10px 12px; border-radius:10px; border:1px solid var(--border);">
+                <div>
+                    <div style="font-weight:700; font-size:14px; color:var(--text-color);">${item.name}</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">${item.label}</div>
+                </div>
+                <div style="font-size:16px; font-weight:900; color:${item.color};">${item.displayVal}</div>
+            </div>`;
+        });
+        html += '</div>';
+        c.innerHTML = html;
+    }
+    document.getElementById("vaultBreakdownModal").classList.add("show");
+}
+
+function closeVaultBreakdownModal() {
+    document.getElementById("vaultBreakdownModal").classList.remove("show");
 }
   
 window.onload = function() {  
