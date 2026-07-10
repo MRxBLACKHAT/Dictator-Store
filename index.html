@@ -261,7 +261,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
             <div class="form-group"><label>Amount</label><input type="number" id="ucAmount" placeholder="₹0"></div>  
         </div>  
 
-        <div class="form-group" style="margin-top:16px;"><label>Payment Status</label><select id="paymentStatus"><option value="Paid">✅ Paid</option><option value="Pending">⏳ Pending</option></select></div>  
+        <div class="form-group" style="margin-top:16px;"><label>Payment Status</label><select id="paymentStatus"><option value="Paid">Paid</option><option value="Pending">Pending</option></select></div>  
         <button id="saveOrderBtn" class="save-btn" onclick="saveOrder()" style="margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="material-icons">save</span> Save Order</button>  
     </div>  
     <h3 style="margin-top:24px;">All Orders</h3><div id="ordersContainer"></div>  
@@ -331,6 +331,16 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
             <div style="margin-top:12px; display:inline-flex; align-items:center; gap:4px; color:var(--gold); font-size:12px; font-weight:700; background-color:rgba(234, 179, 8, 0.1); padding:4px 8px; border-radius:8px;"><span class="material-icons" style="font-size:14px;">input</span> Access Vault</div>
         </div>
     </div>
+
+    <!-- Main Account Stock Vault Entry Card -->
+    <div class="card" style="border: 2px solid #f43f5e; background: linear-gradient(145deg, var(--card-bg), rgba(244, 63, 94, 0.03)); margin-bottom: 20px; cursor: pointer;" onclick="openMainVault()">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="color:#f43f5e; margin:0; display:flex; align-items:center; gap:6px;">
+                <span class="material-icons">account_box</span> Main Account Stock Vault
+            </h3>
+            <div style="font-size: 14px; font-weight: 800; color: #f43f5e;" id="mainVaultTotalSummary">Pop: 0 | Heli: 0 | HV: 0</div>
+        </div>
+    </div>
     
     <div class="card" style="padding: 15px; margin-bottom: 20px; border: 2px dashed var(--primary); background: rgba(37, 99, 235, 0.05); cursor: pointer;" onclick="openQuickCheckModal()">
         <h3 style="margin:0; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -342,7 +352,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
         <h3 style="margin-top:0; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><span class="material-icons" style="color:var(--primary);">online_prediction</span> Sendable Capacity</h3>
         
         <div class="clickable-sendable pop" onclick="showSendableDetails('pop')">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span style="font-weight:800; font-size:15px; display:flex; align-items:center; gap:6px;">Sendable Pop <span class="material-icons" style="font-size:14px; color:var(--text-muted);">touch_app</span></span><span style="font-weight:900; color:var(--primary); font-size:18px;" id="calcPopInstant">0</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span style="font-weight:800; font-size:15px; display:flex; align-items:center; gap:6px;">Sendable Pop <span class="material-icons" style="font-size:14px; color:var(--text-muted); touch-app">touch_app</span></span><span style="font-weight:900; color:var(--primary); font-size:18px;" id="calcPopInstant">0</span></div>
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-muted); background:var(--bg-color); padding:8px 12px; border-radius:8px;"><span style="font-weight:600;">Total Sendable after 15m :-</span><span style="font-weight:800; color:var(--primary);" id="calcPop15m">0</span></div>
         </div>
         
@@ -445,6 +455,63 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
     </div>
     
     <div id="goldLabelsList"></div>
+</div>
+
+<!-- Main Account Vault Overview Page -->
+<div id="mainVaultPage" class="page">
+    <div class="header" style="display:flex; align-items:center; gap:15px;">
+        <button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="showPage('stockPage')"><span class="material-icons">arrow_back</span></button>
+        <h2 style="margin:0; color:#f43f5e;">Main Account Vault</h2>
+    </div>
+    <div class="card" style="border: 1px solid #f43f5e; margin-bottom:20px;">
+        <h3 style="color:#f43f5e; margin-top:0;">Add Main Account</h3>
+        <div class="form-group">
+            <label>Account ID / Name</label>
+            <input id="mainAccNameInput" placeholder="Enter Main Account Name/ID">
+        </div>
+        <button class="save-btn" style="background-color:#f43f5e; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="addMainAccount()"><span class="material-icons">add_box</span> Add Main Account</button>
+    </div>
+    <div id="mainAccountsList"></div>
+</div>
+
+<!-- Main Account Asset Tracking Form Details Page -->
+<div id="mainAccountDetailsPage" class="page">
+    <div class="header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="closeMainAccountDetails()"><span class="material-icons">arrow_back</span></button>
+            <h2 id="mainAccountDetailsTitle" style="margin:0; font-size:22px; color:#f43f5e;">Main Account Details</h2>
+        </div>
+    </div>
+    
+    <div class="card" style="border-left: 5px solid var(--primary);">
+        <h3 style="color:var(--primary); margin-bottom:15px; display:flex; align-items:center; gap:6px;"><span class="material-icons">local_fire_department</span> Popularity Bundles</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;" id="mainPopBundlesContainer"></div>
+    </div>
+
+    <div class="card" style="border-left: 5px solid #f43f5e;">
+        <h3 style="color:#f43f5e; margin-bottom:15px; display:flex; align-items:center; gap:6px;"><span class="material-icons">layers</span> Separate Stock Assets</h3>
+        <div class="form-group">
+            <label>50K Pop Cards</label>
+            <input type="number" id="mainAcc50kInput" placeholder="0" oninput="updateMainAssetFields()">
+        </div>
+        <div class="form-group">
+            <label>Helicopters</label>
+            <input type="number" id="mainAccHeliInput" placeholder="0" oninput="updateMainAssetFields()">
+        </div>
+        <div class="form-group">
+            <label>Home Votes</label>
+            <input type="number" id="mainAccHVInput" placeholder="0" oninput="updateMainAssetFields()">
+        </div>
+    </div>
+    
+    <div class="card" style="background-color:rgba(244, 63, 94, 0.05); border:1px solid #f43f5e; padding:15px; border-radius:16px;">
+        <div style="display:flex; flex-direction:column; gap:6px; font-weight:700;">
+            <div style="display:flex; justify-content:space-between;"><span>Total Popularity:</span> <span id="mainAccCalcPop" style="color:var(--primary);">0</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>50K Cards:</span> <span id="mainAccCalc50k" style="color:#7c3aed;">0</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Helicopters:</span> <span id="mainAccCalcHeli" style="color:var(--warning);">0</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Home Votes:</span> <span id="mainAccCalcHV" style="color:var(--success);">0</span></div>
+        </div>
+    </div>
 </div>
 
 <div id="popGroupDetailsPage" class="page">
@@ -683,8 +750,9 @@ let popLabelGroups = JSON.parse(localStorage.getItem("des_pop_labels") || "[]");
 let hvLabelGroups = JSON.parse(localStorage.getItem("des_hv_labels") || "[]");
 let heliLabelGroups = JSON.parse(localStorage.getItem("des_heli_labels") || "[]");
 let accLabelGroups = JSON.parse(localStorage.getItem("des_acc_labels") || "[]");
+let mainAccounts = JSON.parse(localStorage.getItem("des_main_accounts") || "[]");
 
-let currentPopGroupIndex = null, currentHVGroupIndex = null, currentHeliGroupIndex = null, currentAccGroupIndex = null, currentGoldGroupIndex = null, currentLevelGroupIndex = null;
+let currentPopGroupIndex = null, currentHVGroupIndex = null, currentHeliGroupIndex = null, currentAccGroupIndex = null, currentGoldGroupIndex = null, currentLevelGroupIndex = null, currentMainAccountIndex = null;
 
 function migrateOldLabels() {
     let changed = false;
@@ -739,7 +807,7 @@ window.addEventListener('popstate', function(event) {
     if (event.state && event.state.pageId) {
         const p = event.state.pageId;
         if (p === 'stockPage') {
-            currentPopGroupIndex = currentHVGroupIndex = currentHeliGroupIndex = currentGoldGroupIndex = currentLevelGroupIndex = null;
+            currentPopGroupIndex = currentHVGroupIndex = currentHeliGroupIndex = currentGoldGroupIndex = currentLevelGroupIndex = currentMainAccountIndex = null;
             ["popAccountSearch", "hvAccountSearch", "heliAccountSearch", "goldAccountSearch", "levelAccountSearch"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
             ["modifyMultipleCard", "hvModifyMultipleCard", "heliModifyMultipleCard", "goldModifyMultipleCard", "levelModifyMultipleCard"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.display = "none"; });
         } else if (p === 'accountsManagerPage') {
@@ -749,7 +817,8 @@ window.addEventListener('popstate', function(event) {
         } else if (p === 'popVaultPage') { currentPopGroupIndex = null;
         } else if (p === 'hvVaultPage') { currentHVGroupIndex = null;
         } else if (p === 'heliVaultPage') { currentHeliGroupIndex = null;
-        } else if (p === 'goldVaultPage') { currentGoldGroupIndex = null; }
+        } else if (p === 'goldVaultPage') { currentGoldGroupIndex = null; 
+        } else if (p === 'mainVaultPage') { currentMainAccountIndex = null; }
         showPage(p, false);
     } else { showPage('homePage', false); }
 });
@@ -991,7 +1060,7 @@ function generateInvoice(){
 
 function addBillRow() {
     const div = document.createElement("div"); div.className = "card"; div.style.padding = "15px";
-    div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><label style="margin:0; font-size:12px; color:var(--text-muted); text-transform:uppercase;">Line Item</label><button class="menu-btn" style="width:24px; height:24px;" onclick="this.parentElement.parentElement.remove()"><span class="material-icons" style="font-size:18px; color:var(--danger);">close</span></button></div><select class="billItemType" onchange="toggleBillFields(this)" style="margin-bottom:10px;"><option>Popularity</option><option>Home Votes</option><option>UC</option></select><div class="billNormalFields stats-grid"><input class="billQty" type="number" placeholder="Qty"><input class="billRate" type="number" placeholder="Rate/K"></div><div class="billUcFields stats-grid" style="display:none;"><select class="billUcPack"><option value="60">60 UC</option><option value="325">325 UC</option><option value="660">660 UC</option><option value="1800">1800 UC</option><option value="3850">3850 UC</option><option value="7500">7500 UC</option></select><input class="billUcAmount" type="number" placeholder="Amt"></div>`;
+    div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><label style="margin:0; font-size:12px; color:var(--text-muted); text-transform:uppercase;">Line Item</label><button class="menu-btn" style="width:24px; height:24px;" onclick="this.parentElement.parentElement.remove()"><span class="material-icons" style="font-size:18px; color:var(--danger); row-close">close</span></button></div><select class="billItemType" onchange="toggleBillFields(this)" style="margin-bottom:10px;"><option>Popularity</option><option>Home Votes</option><option>UC</option></select><div class="billNormalFields stats-grid"><input class="billQty" type="number" placeholder="Qty"><input class="billRate" type="number" placeholder="Rate/K"></div><div class="billUcFields stats-grid" style="display:none;"><select class="billUcPack"><option value="60">60 UC</option><option value="325">325 UC</option><option value="660">660 UC</option><option value="1800">1800 UC</option><option value="3850">3850 UC</option><option value="7500">7500 UC</option></select><input class="billUcAmount" type="number" placeholder="Amt"></div>`;
     document.getElementById("billItemsContainer").appendChild(div);
 }
 
@@ -1320,6 +1389,22 @@ function updateRemainingStock(){
         lHeliA += Number(g.total || 0); 
     });
     
+    // Account for Main Account Vault Totals in Summary Peak Counters
+    let mainPopAdd = 0, mainHeliAdd = 0, mainHVAdd = 0;
+    mainAccounts.forEach(m => {
+        let pB = m.popBundles || {};
+        for(let key in pB) {
+            mainPopAdd += (Number(key) * (Number(pB[key]) || 0));
+        }
+        mainPopAdd += (Number(m.pop50k) || 0) * 50000;
+        mainHeliAdd += (Number(m.heli) || 0);
+        mainHVAdd += (Number(m.hv) || 0) * 100;
+    });
+    
+    lpa += mainPopAdd;
+    lHeliA += mainHeliAdd;
+    lha += mainHVAdd;
+
     accLabelGroups.forEach(g => g.accounts.forEach(a => { if(a.isGold) tg++; }));
 
     document.getElementById("remainingPopStock").innerText = formatStockValue((tk * 1000) + lpa);  
@@ -1338,6 +1423,10 @@ function updateRemainingStock(){
     if(document.getElementById("calcPopInstant")) {
         document.getElementById("calcPopInstant").innerText = formatStockValue(pI); document.getElementById("calcPop15m").innerText = formatStockValue(p15);
         document.getElementById("calcHVInstant").innerText = formatStockValue(hvI); document.getElementById("calcHV15m").innerText = formatStockValue(hv15);
+    }
+    
+    if(document.getElementById("mainVaultTotalSummary")) {
+        document.getElementById("mainVaultTotalSummary").innerText = `Pop: ${formatStockValue(mainPopAdd)} | Heli: ${mainHeliAdd} | HV: ${formatStockValue(mainHVAdd)}`;
     }
 } 
 
@@ -1591,6 +1680,7 @@ function filterAccAccounts() { const q = document.getElementById("accSearch").va
 function addAccountToAccGroup() { if(currentAccGroupIndex === null) return; const gI = currentAccGroupIndex, g = accLabelGroups[gI]; let n = prompt("Enter new account name (This will sync to all Vaults):", g.baseName ? generateSmartName(g.baseName, g.accounts.length + 1) : g.label + " " + (g.accounts.length + 1)); if(!n || !n.trim()) return; n = n.trim(); while(g.accounts.find(a => a.name.toLowerCase() === n.toLowerCase())) n += " *"; g.accounts.push({ name: n, x_username: '', email: '', isGold: false, level: 'Below 10 level' }); g.accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveAccLabels(); if (popLabelGroups[gI]) { popLabelGroups[gI].accounts.push({ name: n, counts: { "1500": '', "600": '', "400": '', "200": '' }, pop: 0, isGold: false, level: 'Below 10 level' }); popLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); savePopLabels(); } if (hvLabelGroups[gI]) { hvLabelGroups[gI].accounts.push({ name: n, cards: '', hv: 0, isGold: false, level: 'Below 10 level' }); hvLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveHVLabels(); } if (heliLabelGroups[gI]) { heliLabelGroups[gI].accounts.push({ name: n, heli: 0, isGold: false, level: 'Below 10 level' }); heliLabelGroups[gI].accounts.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true, sensitivity: 'base'})); saveHeliLabels(); } renderAccGroupAccounts(); if(document.getElementById("accModifyMultipleCard").style.display === "block") openAccModifyMultiple(); }
 function openAccModifyMultiple() { if(currentAccGroupIndex === null) return; const g = accLabelGroups[currentAccGroupIndex], fSel = document.getElementById("accModFrom"), tSel = document.getElementById("accModTo"); fSel.innerHTML = ""; tSel.innerHTML = ""; g.accounts.forEach((a, i) => { fSel.innerHTML += `<option value="${i}">${a.name}</option>`; tSel.innerHTML += `<option value="${i}">${a.name}</option>`; }); document.getElementById("accModifyMultipleCard").style.display = "block"; document.getElementById("modAccUsername").value = ""; document.getElementById("modAccEmail").value = ""; document.getElementById("accModifyMultipleCard").scrollIntoView({ behavior: "smooth", block: "start" }); }
 function closeAccModifyMultiple() { document.getElementById("accModifyMultipleCard").style.display = "none"; }
+function applyAccModifyMultiple() { if(currentAccGroupIndex === null) return; const f = parseInt(document.getElementById("accModFrom").value), t = parseInt(document.getElementById("accModTo").value), u = document.getElementById("modAccUsername").value.trim(), e = document.getElementById("modAccEmail").value.trim(), g = accLabelGroups[currentAccGroupIndex]; let offset = 0; for(let i = Math.min(f, t); i <= Math.max(f, t); i++) { if(u) g.accounts[i].x_username = parseAndIncrement(u, offset); if(e) g.accounts[i].email = parseAndIncrement(e, offset); offset++; } saveAccLabels(); renderAccGroupAccounts(); closeAccModifyMultiple(); filterAccAccounts(); }
 function renameSingleAcc(gI, aI) {
     const oldName = accLabelGroups[gI].accounts[aI].name;
     let newName = prompt("Enter new name for account:", oldName);
@@ -1650,7 +1740,8 @@ async function generateTextBackup() {
         des_pop_labels: localStorage.getItem("des_pop_labels"),
         des_hv_labels: localStorage.getItem("des_hv_labels"),
         des_heli_labels: localStorage.getItem("des_heli_labels"),
-        des_acc_labels: localStorage.getItem("des_acc_labels")
+        des_acc_labels: localStorage.getItem("des_acc_labels"),
+        des_main_accounts: localStorage.getItem("des_main_accounts")
     };
     
     const jsonString = JSON.stringify(backup);
@@ -1724,6 +1815,7 @@ async function restoreTextBackup() {
         if (parsedData.des_hv_labels) localStorage.setItem("des_hv_labels", parsedData.des_hv_labels);
         if (parsedData.des_heli_labels) localStorage.setItem("des_heli_labels", parsedData.des_heli_labels);
         if (parsedData.des_acc_labels) localStorage.setItem("des_acc_labels", parsedData.des_acc_labels);
+        if (parsedData.des_main_accounts) localStorage.setItem("des_main_accounts", parsedData.des_main_accounts);
         
         alert("Data successfully restored! Reopening dashboard...");
         location.reload();
@@ -1981,6 +2073,112 @@ function showVaultBreakdown(type) {
 
 function closeVaultBreakdownModal() {
     document.getElementById("vaultBreakdownModal").classList.remove("show");
+}
+
+// --- MAIN ACCOUNT STOCK VAULT SYSTEM ---
+function openMainVault() { renderMainAccounts(); showPage('mainVaultPage'); }
+function saveMainAccounts() { localStorage.setItem("des_main_accounts", JSON.stringify(mainAccounts)); renderMainAccounts(); updateRemainingStock(); }
+function addMainAccount() {
+    const input = document.getElementById("mainAccNameInput");
+    const name = input.value.trim();
+    if(!name) return alert("Enter account name or ID.");
+    if(mainAccounts.some(m => m.name.toLowerCase() === name.toLowerCase())) return alert("Account ID already exists.");
+    
+    mainAccounts.push({
+        name: name,
+        popBundles: { "100": "", "200": "", "300": "", "400": "", "500": "", "600": "", "800": "", "1000": "", "1500": "", "2000": "" },
+        pop50k: "",
+        heli: "",
+        hv: ""
+    });
+    input.value = "";
+    saveMainAccounts();
+}
+function deleteMainAccount(idx) {
+    if(confirm("Are you sure you want to delete this main account record?")) {
+        mainAccounts.splice(idx, 1);
+        saveMainAccounts();
+    }
+}
+function renderMainAccounts() {
+    const c = document.getElementById("mainAccountsList"); c.innerHTML = "";
+    if (mainAccounts.length === 0) {
+        c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No main accounts tracked yet.</div>`;
+        return;
+    }
+    mainAccounts.forEach((m, i) => {
+        let totalPop = 0;
+        let pB = m.popBundles || {};
+        for(let key in pB) { totalPop += (Number(key) * (Number(pB[key]) || 0)); }
+        totalPop += (Number(m.pop50k) || 0) * 50000;
+        
+        c.innerHTML += `<div style="margin-bottom: 12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px;">
+                <div style="flex:1; cursor:pointer;" onclick="viewMainAccountDetails(${i})">
+                    <span style="font-weight: 800; font-size: 15px; color:#f43f5e;">${m.name}</span>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Pop: ${formatStockValue(totalPop)} | Heli: ${m.heli || 0} | HV: ${formatStockValue((m.hv || 0) * 100)}</div>
+                </div>
+                <button class="menu-btn" onclick="deleteMainAccount(${i})" style="width: 24px; height: 24px;"><span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span></button>
+            </div>
+        </div>`;
+    });
+}
+function viewMainAccountDetails(idx) {
+    currentMainAccountIndex = idx;
+    const m = mainAccounts[idx];
+    document.getElementById("mainAccountDetailsTitle").innerText = m.name;
+    
+    const popBundles = ["100", "200", "300", "400", "500", "600", "800", "1000", "1500", "2000"];
+    const container = document.getElementById("mainPopBundlesContainer");
+    container.innerHTML = "";
+    
+    popBundles.forEach(b => {
+        let val = (m.popBundles && m.popBundles[b]) ? m.popBundles[b] : "";
+        container.innerHTML += `<div class="form-group" style="margin:0;">
+            <label style="font-size:11px;">Bundle ${b}</label>
+            <input type="number" value="${val}" placeholder="-" oninput="updateMainPopBundle('${b}', this.value)" style="padding:10px;">
+        </div>`;
+    });
+    
+    document.getElementById("mainAcc50kInput").value = m.pop50k || "";
+    document.getElementById("mainAccHeliInput").value = m.heli || "";
+    document.getElementById("mainAccHVInput").value = m.hv || "";
+    
+    updateMainAssetFields();
+    showPage('mainAccountDetailsPage');
+}
+function updateMainPopBundle(bundle, val) {
+    if(currentMainAccountIndex === null) return;
+    if(!mainAccounts[currentMainAccountIndex].popBundles) mainAccounts[currentMainAccountIndex].popBundles = {};
+    mainAccounts[currentMainAccountIndex].popBundles[bundle] = val;
+    localStorage.setItem("des_main_accounts", JSON.stringify(mainAccounts));
+    updateMainAssetFields();
+}
+function updateMainAssetFields() {
+    if(currentMainAccountIndex === null) return;
+    const m = mainAccounts[currentMainAccountIndex];
+    
+    m.pop50k = document.getElementById("mainAcc50kInput").value;
+    m.heli = document.getElementById("mainAccHeliInput").value;
+    m.hv = document.getElementById("mainAccHVInput").value;
+    localStorage.setItem("des_main_accounts", JSON.stringify(mainAccounts));
+    
+    let totalPop = 0;
+    let pB = m.popBundles || {};
+    for(let key in pB) { totalPop += (Number(key) * (Number(pB[key]) || 0)); }
+    totalPop += (Number(m.pop50k) || 0) * 50000;
+    
+    document.getElementById("mainAccCalcPop").innerText = formatStockValue(totalPop);
+    document.getElementById("mainAccCalc50k").innerText = m.pop50k || "0";
+    document.getElementById("mainAccCalcHeli").innerText = m.heli || "0";
+    document.getElementById("mainAccCalcHV").innerText = formatStockValue((Number(m.hv) || 0) * 100);
+    
+    updateRemainingStock();
+}
+function closeMainAccountDetails() {
+    currentMainAccountIndex = null;
+    renderMainAccounts();
+    showPage('mainVaultPage');
 }
   
 window.onload = function() {  
