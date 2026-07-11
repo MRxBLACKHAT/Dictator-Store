@@ -181,7 +181,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
             </div>
             <div class="form-group"><label>Rate (per K or ea)</label><input type="number" id="rate" placeholder="₹0"></div>  
         </div>  
-        <div id="ucFields" style="display:none"><div class="form-group"><label>UC Pack</label><select id="ucPack"><option>60 UC</option><option>325 UC</option><option>660 UC</option><option>1800 UC</option><option>3850 UC</option><option>7500 UC</option></select></div><div class="form-group"><label>Amount</label><input type="number" id="ucAmount" placeholder="₹0"></div></div>  
+        <div id="ucFields" style="display:none"><div class="form-group"><label>UC Pack</label><select id="ucPack"><option value="60 UC">60 UC</option><option value="325 UC">325 UC</option><option value="660 UC">660 UC</option><option value="1800 UC">1800 UC</option><option value="3850 UC">3850 UC</option><option value="7500 UC">7500 UC</option></select></div><div class="form-group"><label>Amount</label><input type="number" id="ucAmount" placeholder="₹0"></div></div>  
         <div class="form-group" style="margin-top:16px;"><label>Payment Status</label><select id="paymentStatus"><option value="Paid">✅ Paid</option><option value="Pending">⏳ Pending</option></select></div>  
         <button id="saveOrderBtn" class="save-btn" onclick="saveOrder()" style="margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="material-icons">save</span> Save Order</button>  
     </div>  
@@ -374,19 +374,19 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
             <h3 style="color:var(--secondary); margin-top:0; margin-bottom:15px; display:flex; align-items:center; gap:6px;"><span class="material-icons">layers</span> Massive Pop Cards</h3>
             <div class="form-group" style="margin:0;">
                 <label style="color:var(--text-muted); font-size:12px; text-transform:uppercase;">No. of 50K Cards</label>
-                <input type="number" id="mainAcc50kInput" placeholder="0" oninput="updateMainAsset('pop50k', this.value)" style="border-color:var(--secondary); font-weight:800; font-size:18px;">
+                <input type="number" id="mainAcc50kInput" placeholder="0" onblur="updateMainAsset('pop50k', this.value)" style="border-color:var(--secondary); font-weight:800; font-size:18px;">
             </div>
         </div>
 
         <div class="stats-grid">
             <div class="card" style="border-left: 5px solid var(--warning); margin:0;">
                 <h3 style="color:var(--warning); margin-top:0; font-size:15px; display:flex; align-items:center; gap:6px;"><span class="material-icons">flight_takeoff</span> Helicopters</h3>
-                <input type="number" id="mainAccHeliInput" placeholder="0" oninput="updateMainAsset('heli', this.value)" style="border-color:var(--warning); font-weight:800; font-size:18px;">
+                <input type="number" id="mainAccHeliInput" placeholder="0" onblur="updateMainAsset('heli', this.value)" style="border-color:var(--warning); font-weight:800; font-size:18px;">
             </div>
             <div class="card" style="border-left: 5px solid var(--success); margin:0;">
                 <h3 style="color:var(--success); margin-top:0; font-size:15px; display:flex; align-items:center; gap:6px;"><span class="material-icons">favorite</span> Home Votes</h3>
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; font-weight:800;">ENTER NO. OF CARDS</div>
-                <input type="number" id="mainAccHVInput" placeholder="0" oninput="updateMainAsset('hv', this.value)" style="border-color:var(--success); font-weight:800; font-size:18px; color:var(--success);">
+                <input type="number" id="mainAccHVInput" placeholder="0" onblur="updateMainAsset('hv', this.value)" style="border-color:var(--success); font-weight:800; font-size:18px; color:var(--success);">
             </div>
         </div>
     </div>
@@ -417,7 +417,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
 
 <div id="hvGroupDetailsPage" class="page">
     <div class="header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;"><div style="display:flex; align-items:center; gap:15px;"><button class="menu-btn" style="background-color:var(--card-bg); box-shadow:var(--shadow);" onclick="closeHVGroupDetails()"><span class="material-icons">arrow_back</span></button><h2 id="hvGroupDetailsTitle" style="margin:0; font-size:22px;">Label</h2></div><div style="background-color: rgba(22, 163, 74, 0.1); color: var(--success); padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 16px;"><span id="activeHVGroupTotalM">0</span></div></div>
-    <div class="card" style="padding: 10px 16px; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted); animate:none;">search</span><input id="hvAccountSearch" placeholder="Search accounts..." onkeyup="filterHVAccounts()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>
+    <div class="card" style="padding: 10px 16px; margin-bottom: 15px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted);">search</span><input id="hvAccountSearch" placeholder="Search accounts..." onkeyup="filterHVAccounts()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>
     <div style="display:flex; gap:10px; margin-bottom: 20px;"><button class="action-btn btn-purple" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding: 14px;" onclick="openHVModifyMultiple()"><span class="material-icons">playlist_add_check</span> Bulk Edit</button></div>
     <div class="card" id="hvModifyMultipleCard" style="display:none; border: 2px solid var(--secondary); margin-bottom: 20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><h3 style="color:var(--secondary); margin:0; display:flex; align-items:center; gap:6px;"><span class="material-icons">edit_note</span> Bulk Mod</h3><button class="menu-btn" onclick="closeHVModifyMultiple()"><span class="material-icons">close</span></button></div>
@@ -471,7 +471,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
     <div class="header"><h1>Reseller Hub</h1></div>
     <div class="card">  
         <div class="form-group"><label>Customer Name</label><input id="resellCustomer" placeholder="Enter name"></div>  
-        <div class="stats-grid"><div class="form-group"><label>Item</label><select id="resellItem"><option>Popularity</option><option>Home Votes</option><option>Helicopters</option></select></div><div class="form-group"><label>Margin/M (or ea)</label><select id="resellMargin" onchange="calculateResellProfit()"><option value="250">₹250</option><option value="200">₹200</option></select></div></div>
+        <div class="stats-grid"><div class="form-group"><label>Item</label><select id="resellItem"><option value="Popularity">Popularity</option><option value="Home Votes">Home Votes</option><option value="Helicopters">Helicopters</option></select></div><div class="form-group"><label>Margin/M (or ea)</label><select id="resellMargin" onchange="calculateResellProfit()"><option value="250">₹250</option><option value="200">₹200</option></select></div></div>
         <div class="stats-grid"><div class="form-group"><label>Qty</label><input type="number" id="resellQty" placeholder="0" oninput="calculateResellProfit()"></div><div class="form-group"><label>Est. Profit</label><input id="resellProfit" readonly style="background-color:rgba(22, 163, 74, 0.1); color:var(--success); font-weight:bold; border-color:var(--success);"></div></div>
         <div class="form-group"><label>Status</label><select id="resellStatus"><option value="Paid">✅ Paid</option><option value="Pending">⏳ Pending</option></select></div>  
         <button class="save-btn" onclick="saveResellOrder()" style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px;"><span class="material-icons">trending_up</span> Save Resell</button>  
@@ -481,7 +481,7 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
 
 <div id="ledgerPage" class="page">  
     <div class="header"><h1>Ledger Vault</h1></div>
-    <div class="card" style="padding: 10px 16px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted);">search</span><input id="ledgerSearch" placeholder="Search customer records..." onkeyup="renderLedger()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>  
+    <div class="card" style="padding: 10px 16px;"><div style="display:flex; align-items:center; gap:10px;"><span class="material-icons" style="color:var(--text-muted); integrity:none;">search</span><input id="ledgerSearch" placeholder="Search customer records..." onkeyup="renderLedger()" style="border:none; background-color:transparent; padding:8px 0; box-shadow:none;"></div></div>  
     <div id="ledgerContainer"></div>  
 </div>  
 
@@ -802,7 +802,7 @@ function generateInvoice(){
 
 function addBillRow() {
     const div = document.createElement("div"); div.className = "card"; div.style.padding = "15px";
-    div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><label style="margin:0; font-size:12px; color:var(--text-muted); text-transform:uppercase;">Line Item</label><button class="menu-btn" style="width:24px; height:24px;" onclick="this.parentElement.parentElement.remove()"><span class="material-icons" style="font-size:18px; color:var(--danger);">close</span></button></div><select class="billItemType" onchange="toggleBillFields(this)" style="margin-bottom:10px;"><option>Popularity</option><option>Home Votes</option><option>UC</option></select><div class="billNormalFields stats-grid"><input class="billQty" type="number" placeholder="Qty"><input class="billRate" type="number" placeholder="Rate/K"></div><div class="billUcFields stats-grid" style="display:none;"><select class="billUcPack"><option value="60">60 UC</option><option value="325">325 UC</option><option value="660">660 UC</option><option value="1800">1800 UC</option><option value="3850">3850 UC</option><option value="7500">7500 UC</option></select><input class="billUcAmount" type="number" placeholder="Amt"></div>`;
+    div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><label style="margin:0; font-size:12px; color:var(--text-muted); text-transform:uppercase;">Line Item</label><button class="menu-btn" style="width:24px; height:24px;" onclick="this.parentElement.parentElement.remove()"><span class="material-icons" style="font-size:18px; color:var(--danger);">close</span></button></div><select class="billItemType" onchange="toggleBillFields(this)" style="margin-bottom:10px;"><option value="Popularity">Popularity</option><option value="Home Votes">Home Votes</option><option value="UC">UC</option></select><div class="billNormalFields stats-grid"><input class="billQty" type="number" placeholder="Qty"><input class="billRate" type="number" placeholder="Rate/K"></div><div class="billUcFields stats-grid" style="display:none;"><select class="billUcPack"><option value="60">60 UC</option><option value="325">325 UC</option><option value="660">660 UC</option><option value="1800">1800 UC</option><option value="3850">3850 UC</option><option value="7500">7500 UC</option></select><input class="billUcAmount" type="number" placeholder="Amt"></div>`;
     document.getElementById("billItemsContainer").appendChild(div);
 }
 function toggleBillFields(sel) { const c = sel.parentElement; c.querySelector(".billNormalFields").style.display = sel.value === "UC" ? "none" : "grid"; c.querySelector(".billUcFields").style.display = sel.value === "UC" ? "grid" : "none"; }
@@ -1101,69 +1101,6 @@ function updateRemainingStock(){
     }
 } 
 
-function renderMainVault() {
-    if(!mainAccountData) {
-        document.getElementById("mainVaultSetupCard").style.display = "block";
-        document.getElementById("mainVaultContentCard").style.display = "none";
-    } else {
-        document.getElementById("mainVaultSetupCard").style.display = "none";
-        document.getElementById("mainVaultContentCard").style.display = "block";
-        
-        document.getElementById("mainAccTitle").innerText = mainAccountData.name;
-        
-        const bundles = ["100", "200", "300", "400", "500", "600", "800", "1000", "1500", "2000"];
-        const c = document.getElementById("mainPopBundlesContainer"); c.innerHTML = "";
-        let totalPop = (Number(mainAccountData.pop50k) || 0) * 50000;
-        
-        bundles.forEach(b => {
-            let v = mainAccountData.popBundles?.[b] || "";
-            totalPop += Number(b) * (Number(v) || 0);
-            c.innerHTML += `<div class="bundle-input-wrapper"><label>${b}</label><input type="number" placeholder="-" value="${v}" oninput="updateMainAsset('popBundles', this.value, '${b}')"></div>`;
-        });
-        
-        document.getElementById("mainHeroPop").innerText = formatStockValue(totalPop);
-        document.getElementById("mainHeroHeli").innerText = mainAccountData.heli || 0;
-        document.getElementById("mainHeroHV").innerText = formatStockValue((Number(mainAccountData.hv) || 0) * 100);
-        
-        document.getElementById("mainAcc50kInput").value = mainAccountData.pop50k || "";
-        document.getElementById("mainAccHeliInput").value = mainAccountData.heli || "";
-        document.getElementById("mainAccHVInput").value = mainAccountData.hv || "";
-    }
-}
-function setupMainAccount() {
-    const n = document.getElementById("mainAccSetupName").value.trim();
-    if(!n) return alert("Enter a name");
-    mainAccountData = { name: n, popBundles: {}, pop50k: "", heli: "", hv: "" };
-    saveMainAccount();
-}
-function updateMainAsset(field, val, subfield=null) {
-    if(!mainAccountData) return;
-    if(subfield) {
-        if(!mainAccountData[field]) mainAccountData[field] = {};
-        mainAccountData[field][subfield] = val;
-    } else {
-        mainAccountData[field] = val;
-    }
-    saveMainAccount();
-}
-function saveMainAccount() {
-    localStorage.setItem("des_main_acc", JSON.stringify(mainAccountData));
-    updateRemainingStock();
-    if(document.getElementById("mainVaultPage").classList.contains("active")) renderMainVault();
-}
-function deleteMainAccount() {
-    if(confirm("Are you absolutely sure you want to delete the main account and ALL its stock data?")) {
-        mainAccountData = null;
-        document.getElementById("mainAccSetupName").value = "";
-        saveMainAccount();
-    }
-}
-function editMainAccountName() {
-    if(!mainAccountData) return;
-    let n = prompt("Enter new name for the Main Account:", mainAccountData.name);
-    if(n && n.trim()) { mainAccountData.name = n.trim(); saveMainAccount(); }
-}
-
 function openPopVault() { renderPopLabels(); showPage('popVaultPage'); }
 function savePopLabels() { localStorage.setItem("des_pop_labels", JSON.stringify(popLabelGroups)); renderPopLabels(); renderPopLabelCheckboxes(); }
 function viewPopGroup(idx) { currentPopGroupIndex = idx; const g = popLabelGroups[idx]; document.getElementById("popGroupDetailsTitle").innerText = g.label; document.getElementById("activeGroupTotalM").innerText = formatStockValue(g.total || 0); renderPopGroupAccounts(); showPage('popGroupDetailsPage'); }
@@ -1326,11 +1263,7 @@ function renderLevelLabels() {
     let lB = 0, l10 = 0, l25 = 0, l30 = 0;
     if (accLabelGroups.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No labels yet.</div>`; } 
     else {
-        accLabelGroups.forEach((g, i) => { 
-            const aC = g.accounts.length; 
-            g.accounts.forEach(a => { const l = a.level || "Below 10 level"; if (l === "Level 30+") l30++; else if (l === "Level 25+") l25++; else if (l === "Level 10+") l10++; else lB++; });
-            c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer;" onclick="viewLevelGroup(${i})"><div style="display:flex; align-items:center; gap:10px; flex:1;"><span style="font-weight: 800; font-size: 15px; color:var(--level);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${aC} accounts</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(139, 92, 246, 0.1); color: var(--level); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align:middle;">tune</span> Set</div></div></div></div>`; 
-        }); 
+        accLabelGroups.forEach((g, i) => { const aC = g.accounts.length; g.accounts.forEach(a => { const l = a.level || "Below 10 level"; if (l === "Level 30+") l30++; else if (l === "Level 25+") l25++; else if (l === "Level 10+") l10++; else lB++; }); c.innerHTML += `<div style="margin-bottom: 12px;"><div style="display:flex; justify-content:space-between; align-items:center; background-color: var(--card-bg); padding: 12px 15px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer;" onclick="viewLevelGroup(${i})"><div style="display:flex; align-items:center; gap:10px; flex:1;"><span style="font-weight: 800; font-size: 15px; color:var(--level);">${g.label} <span style="color:var(--text-muted); font-size:13px; font-weight:600;">:- ${aC} accounts</span></span></div><div style="display:flex; align-items:center; gap: 12px;"><div style="background-color: rgba(139, 92, 246, 0.1); color: var(--level); padding: 6px 10px; border-radius: 8px; font-weight: 800; font-size: 14px;"><span class="material-icons" style="font-size:16px; vertical-align:middle;">tune</span> Set</div></div></div></div>`; }); 
     }
     if(document.getElementById("statLevelBelow10")) document.getElementById("statLevelBelow10").innerText = lB;
     if(document.getElementById("statLevel10")) document.getElementById("statLevel10").innerText = l10;
@@ -1347,7 +1280,7 @@ function applyLevelModifyMultiple() { if(currentLevelGroupIndex === null) return
 function renderLevelGroupAccounts() { if(currentLevelGroupIndex === null) return; const gI = currentLevelGroupIndex, g = accLabelGroups[gI], c = document.getElementById("levelGroupAccountsContainer"); c.innerHTML = ""; let h = `<div style="display:flex; flex-direction:column; gap:12px;">`; g.accounts.forEach((a, aI) => { let cL = a.level || "Below 10 level"; h += `<div class="level-account-item card" style="padding:15px; border-radius:16px; margin-bottom:0; display:flex; justify-content:space-between; align-items:center;"><div class="level-account-name-label" style="font-size:15px; font-weight:800;">${a.name}</div><select onchange="toggleSingleLevel(${gI}, ${aI}, this.value)" style="width:140px; padding:8px 10px; font-size:13px; border-color:var(--level);"><option value="Below 10 level" ${cL === 'Below 10 level' ? 'selected' : ''}>Below 10 level</option><option value="Level 10+" ${cL === 'Level 10+' ? 'selected' : ''}>Level 10+</option><option value="Level 25+" ${cL === 'Level 25+' ? 'selected' : ''}>Level 25+</option><option value="Level 30+" ${cL === 'Level 30+' ? 'selected' : ''}>Level 30+</option></select></div>`; }); h += `</div>`; c.innerHTML = h; }
 
 function generateAccAccounts() { const l = document.getElementById("accLabelInput").value.trim(), c = parseInt(document.getElementById("accCountInput").value); if (!l || isNaN(c) || c <= 0) return alert("Enter label and count."); const dL = getDisplayLabel(l); const gA = { label: dL, baseName: l, accounts: [] }, gP = { label: dL, baseName: l, total: 0, accounts: [] }, gH = { label: dL, baseName: l, total: 0, accounts: [] }, gHeli = { label: dL, baseName: l, total: 0, accounts: [] }; for (let i = 1; i <= c; i++) { const aN = generateSmartName(l, i); gA.accounts.push({ name: aN, x_username: '', email: '', isGold: false, level: 'Below 10 level' }); gP.accounts.push({ name: aN, counts: { "1500": '', "600": '', "400": '', "200": '' }, pop: 0, isGold: false, level: 'Below 10 level' }); gH.accounts.push({ name: aN, cards: '', hv: 0, isGold: false, level: 'Below 10 level' }); gHeli.accounts.push({ name: aN, heli: 0, isGold: false, level: 'Below 10 level' }); } accLabelGroups.unshift(gA); saveAccLabels(); popLabelGroups.unshift(gP); savePopLabels(); hvLabelGroups.unshift(gH); saveHVLabels(); heliLabelGroups.unshift(gHeli); saveHeliLabels(); updateRemainingStock(); document.getElementById("accLabelInput").value = ""; document.getElementById("accCountInput").value = ""; }
-function saveAccLabels() { localStorage.setItem("des_acc_labels", JSON.stringify(accLabelGroups)); renderAccLabels(); renderLevelLabels(); syncAllVaults(); }
+function saveAccLabels() { localStorage.setItem("des_acc_labels", JSON.stringify(accLabelGroups)); renderAccLabels(); renderLevelLabels(); }
 function viewAccGroup(i) { currentAccGroupIndex = i; document.getElementById("accGroupDetailsTitle").innerText = accLabelGroups[i].label; renderAccGroupAccounts(); showPage('accGroupDetailsPage'); }
 function closeAccGroupDetails() { currentAccGroupIndex = null; document.getElementById("accSearch").value = ""; document.getElementById("accModifyMultipleCard").style.display = "none"; renderAccLabels(); showPage('accountsManagerPage'); }
 function filterAccAccounts() { const q = document.getElementById("accSearch").value.toLowerCase(); document.querySelectorAll(".acc-account-item").forEach(i => { i.style.display = i.querySelector(".acc-name-label").innerText.toLowerCase().includes(q) ? "block" : "none"; }); }
@@ -1373,7 +1306,7 @@ function renderAccLabels() { const c = document.getElementById("accLabelsList");
 
 function calculateResellProfit() { const p = (Number(document.getElementById("resellQty").value || 0) / 1000) * Number(document.getElementById("resellMargin").value || 250); document.getElementById("resellProfit").value = "₹" + p.toFixed(2); }
 function saveResellOrder() { const c = document.getElementById("resellCustomer").value, q = document.getElementById("resellQty").value, m = document.getElementById("resellMargin").value; if(!c || !q) return alert("Fill all fields"); const ro = { id: "RES-" + String(resellOrders.length + 1).padStart(6, "0"), customer: c, item: document.getElementById("resellItem").value, margin: m, qty: q, profit: (Number(q) / 1000) * Number(m), status: document.getElementById("resellStatus").value, date: new Date().toLocaleString() }; resellOrders.push(ro); localStorage.setItem("des_resell_orders", JSON.stringify(resellOrders)); document.getElementById("resellCustomer").value = ""; document.getElementById("resellQty").value = ""; renderResellOrders(); updateDashboard(); navTo("resellPage"); }
-function renderResellOrders() { const c = document.getElementById("resellContainer"); if(!c) return; c.innerHTML = ""; [...resellOrders].reverse().forEach((o, oI) => { const i = resellOrders.length - 1 - oI, b = o.status === "Paid" ? "var(--success)" : "var(--warning)", bg = o.status === "Paid" ? "rgba(22, 163, 74, 0.1)" : "rgba(245, 158, 11, 0.1)"; c.innerHTML += `<div class="order-card" style="border-left: 4px solid var(--secondary);"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><div class="order-id" style="color:var(--secondary); background-color:rgba(124, 58, 237, 0.1);">${o.id}</div><div style="font-size:16px; font-weight:800; margin-top:8px;">${o.customer}</div><div style="font-size:13px; color:var(--text-muted); margin-top:4px;">${o.qty}K &bull; Margin: ₹${o.margin}/M</div></div><div style="text-align:right;"><button class="menu-btn" style="display:inline-flex; float:right;" onclick="deleteResellOrder(${i})"><span class="material-icons" style="font-size:20px; color:var(--danger);">delete</span></button></div></div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; border-top:1px solid var(--border); padding-top:12px;"><div><span style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Est. Profit</span><br><span style="font-size:18px; font-weight:800; color:var(--success);">₹${o.profit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div><button onclick="toggleResellStatus(${i})" style="background-color:${bg}; color:${b}; border:none; padding:6px 12px; border-radius:12px; font-size:12px; font-weight:800; cursor:pointer; text-transform:uppercase;">${o.status}</button></div></div>`; }); }
+function renderResellOrders() { const c = document.getElementById("resellContainer"); if(!c) return; c.innerHTML = ""; [...resellOrders].reverse().forEach((o, oI) => { const i = resellOrders.length - 1 - oI, b = o.status === "Paid" ? "var(--success)" : "var(--warning)", bg = o.status === "Paid" ? "rgba(22, 163, 74, 0.1)" : "rgba(245, 158, 11, 0.1)"; c.innerHTML += `<div class="order-card" style="border-left: 4px solid var(--secondary);"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><div class="order-id" style="color:var(--secondary); background-color:rgba(124, 58, 237, 0.1);">${o.id}</div><div style="font-size:16px; font-weight:800; margin-top:8px;">${o.customer}</div><div style="font-size:13px; color:var(--text-muted); margin-top:4px;">${o.qty}K &bull; Margin: ₹${o.margin}/M</div></div><div style="text-align:right;"><button class="menu-btn" style="display:inline-flex; float:right;" onclick="deleteResellOrder(${i})"><span class="material-icons" style="font-size:20px; color:var(--danger);">delete</span></button></div></div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; border-top:1px solid var(--border); padding-top:12px;"><div><span style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Est. Profit</span>br><span style="font-size:18px; font-weight:800; color:var(--success);">₹${o.profit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div><button onclick="toggleResellStatus(${i})" style="background-color:${bg}; color:${b}; border:none; padding:6px 12px; border-radius:12px; font-size:12px; font-weight:800; cursor:pointer; text-transform:uppercase;">${o.status}</button></div></div>`; }); }
 function deleteResellOrder(i) { if(confirm("Delete resell record?")) { resellOrders.splice(i, 1); localStorage.setItem("des_resell_orders", JSON.stringify(resellOrders)); renderResellOrders(); updateDashboard(); } }
 function toggleResellStatus(i) { resellOrders[i].status = resellOrders[i].status === "Pending" ? "Paid" : "Pending"; localStorage.setItem("des_resell_orders", JSON.stringify(resellOrders)); renderResellOrders(); updateDashboard(); }
 
@@ -1538,17 +1471,14 @@ function closeVaultBreakdownModal() {
 // --- MAIN ACCOUNT STOCK VAULT SYSTEM (Single Account Setup) ---
 function renderMainVault() {
     if(!mainAccountData) {
-        // Show Setup UI if no Main Account exists
         document.getElementById("mainVaultSetupCard").style.display = "block";
         document.getElementById("mainVaultContentCard").style.display = "none";
     } else {
-        // Show Designer Dashboard UI
         document.getElementById("mainVaultSetupCard").style.display = "none";
         document.getElementById("mainVaultContentCard").style.display = "block";
         
         document.getElementById("mainAccTitle").innerText = mainAccountData.name;
         
-        // Render 10 Pop Bundle Fields
         const bundles = ["100", "200", "300", "400", "500", "600", "800", "1000", "1500", "2000"];
         const c = document.getElementById("mainPopBundlesContainer"); 
         c.innerHTML = "";
@@ -1561,16 +1491,14 @@ function renderMainVault() {
             c.innerHTML += `
                 <div class="form-group" style="margin:0;">
                     <label style="font-size:11px; text-align:center; width:100%; display:block; color:var(--text-muted);">Bundle ${b}</label>
-                    <input type="number" placeholder="-" value="${v}" oninput="updateMainAsset('popBundles', this.value, '${b}')" style="padding:10px; text-align:center; font-weight:800; border-color:var(--primary); color:var(--primary);">
+                    <input type="number" placeholder="-" value="${v}" onblur="updateMainAsset('popBundles', this.value, '${b}')" style="padding:10px; text-align:center; font-weight:800; border-color:var(--primary); color:var(--primary);">
                 </div>`;
         });
         
-        // Update Hero Stats
         document.getElementById("mainHeroPop").innerText = formatStockValue(totalPop);
         document.getElementById("mainHeroHeli").innerText = mainAccountData.heli || 0;
         document.getElementById("mainHeroHV").innerText = formatStockValue((Number(mainAccountData.hv) || 0) * 100);
         
-        // Populate Other Asset Fields
         document.getElementById("mainAcc50kInput").value = mainAccountData.pop50k || "";
         document.getElementById("mainAccHeliInput").value = mainAccountData.heli || "";
         document.getElementById("mainAccHVInput").value = mainAccountData.hv || "";
@@ -1581,7 +1509,6 @@ function setupMainAccount() {
     const n = document.getElementById("mainAccSetupName").value.trim();
     if(!n) return alert("Please enter a name for your Main Account.");
     
-    // Create ONE singular object
     mainAccountData = { 
         name: n, 
         popBundles: {}, 
@@ -1606,10 +1533,8 @@ function updateMainAsset(field, val, subfield=null) {
 
 function saveMainAccount() {
     localStorage.setItem("des_main_acc", JSON.stringify(mainAccountData));
-    updateRemainingStock(); // Sync with master stock counter
-    if(document.getElementById("mainVaultPage").classList.contains("active")) {
-        renderMainVault();
-    }
+    updateRemainingStock(); 
+    // The renderMainVault() line has been removed to preserve input focus
 }
 
 function deleteMainAccount() {
@@ -1653,4 +1578,3 @@ window.onload = function() {
 </script>  
 </body>  
 </html>
-    
