@@ -646,8 +646,23 @@ function showPage(pageId, pushToHistory = true) {
 }  
 function navTo(pageId) { showPage(pageId); }
 
+function openModalSafe(id) {
+    const el = document.getElementById(id);
+    if (!el.classList.contains("show")) {
+        el.classList.add("show");
+        window.history.pushState({ modalOpen: true, pageId: history.state ? history.state.pageId : 'homePage' }, "", "");
+    }
+}
+
+function closeModalSafe(id) {
+    document.getElementById(id).classList.remove("show");
+    if(history.state && history.state.modalOpen) window.history.back();
+}
+
 window.addEventListener('popstate', function(event) {
+    document.querySelectorAll('.invoice-modal.show').forEach(m => m.classList.remove('show'));
     if (event.state && event.state.pageId) {
+
         const p = event.state.pageId;
         if (p === 'stockPage') {
             currentPopGroupIndex = currentHVGroupIndex = currentHeliGroupIndex = currentGoldGroupIndex = currentLevelGroupIndex = null;
@@ -880,10 +895,10 @@ function showInvoice(inv){
     const paid = Number(inv.paid || 0); const due = Math.max(0, inv.amount - paid);
     let summaryHtml = `<div style="background-color: #fafafa; border-top: 2px solid #000000; border-bottom: 2px solid #000000; padding: 15px 12px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div style="font-size: 13px; font-weight: 700; color: #64748b; text-transform:uppercase;">Subtotal</div><div style="font-size: 15px; font-weight: 800; color: #000000;">₹${inv.amount.toLocaleString()}</div></div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #cbd5e1;"><div style="font-size: 13px; font-weight: 700; color: #10b981; text-transform:uppercase;">Amount Paid</div><div style="font-size: 15px; font-weight: 800; color: #10b981;">- ₹${paid.toLocaleString()}</div></div><div style="display: flex; justify-content: space-between; align-items: center;"><div style="font-size: 15px; font-weight: 900; color: #000000; text-transform:uppercase;">Balance Due</div><div style="font-size: 24px; font-weight: 900; color: ${due > 0 ? '#ef4444' : '#10b981'};">₹${due.toLocaleString()}</div></div></div>`;
     document.getElementById("invoicePreviewContent").innerHTML=`<div id="printInvoice" style="background-color:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08); border:1px solid #e2e8f0; position:relative; font-family:'Inter', Arial, sans-serif;"><div style="background-color: #000000; color: white; padding: 25px 20px; text-align: center;"><h2 style="margin: 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase; font-weight:900;">Dictator E-Store</h2><div style="font-size: 11px; color:#a1a1aa; margin-top: 6px; font-weight:600; letter-spacing: 3px; text-transform:uppercase;">OFFICIAL INVOICE</div></div><div style="padding: 20px;"><div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;"><div><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; font-weight:700;">Billed To</div><div style="font-size: 18px; font-weight: 900; color: #000000;">${inv.customer}</div></div><div style="text-align: right;"><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; font-weight:700;">Invoice No</div><div style="font-weight: 800; color: #000000; font-size: 14px; margin-bottom: 8px;">${inv.invoiceId}</div><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; font-weight:700;">Date</div><div style="font-weight: 700; color: #000000; font-size: 12px;">${inv.date.split(',')[0]}</div></div></div><div style="margin-bottom: 20px;"><div style="display: flex; justify-content: space-between; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #000000; padding-bottom: 8px; margin-bottom: 15px; font-weight:800;"><div>Item Description</div><div>Amount</div></div><div style="color: #0f172a; line-height: 1.6;">${det}</div></div>${summaryHtml}<div style="text-align:center; margin-top:25px; font-size:11px; color:#94a3b8; font-weight:600;">Thank you for your business!</div></div></div><button class="save-btn btn-black" style="margin-top:20px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="downloadInvoice()"><span class="material-icons">print</span> View / Print</button>`;  
-    document.getElementById("invoiceModal").classList.add("show");
+        openModalSafe("invoiceModal");
 }  
-function closeInvoiceModal() { document.getElementById("invoiceModal").classList.remove("show"); }
-  
+function closeInvoiceModal() { closeModalSafe("invoiceModal"); }
+
 function renderMultiOrders(){  
     const b=document.getElementById("multiOrderList"); if(!b) return; b.innerHTML="";  
     orders.forEach(o=>{ b.innerHTML += `<label style="display:flex; align-items:center; gap:12px; padding:14px; background-color:var(--bg-color); border-radius:12px; margin-bottom:8px; cursor:pointer; border:1px solid var(--border);"><input type="checkbox" class="multiOrder" value="${o.id}" style="width:20px; height:20px; margin:0; accent-color:var(--secondary);"><div style="flex:1;"><div style="font-weight:700; font-size:15px;">${o.customer}</div><div style="font-size:13px; color:var(--text-muted); margin-top:2px;">${o.id} &bull; ${o.item}</div></div><div style="font-weight:800; color:var(--text-color); font-size:16px;">₹${o.amount.toLocaleString()}</div></label>`; });  
@@ -1596,9 +1611,9 @@ function openQuickCheckModal() {
     Array.from(labels).sort().forEach(l => { lSel.innerHTML += `<option value="${l}">${l}</option>`; });
     document.getElementById("qcAccountSelect").innerHTML = '<option value="">-- Select Account --</option>';
     document.getElementById("quickCheckResultBox").style.display = "none"; document.getElementById("qcHeliBlock").style.display = "none";
-    document.getElementById("quickCheckModal").classList.add("show");
+        openModalSafe("quickCheckModal");
 }
-function closeQuickCheckModal() { document.getElementById("quickCheckModal").classList.remove("show"); }
+function closeQuickCheckModal() { closeModalSafe("quickCheckModal"); }
 function updateQCAccountSelect() {
     const l = document.getElementById("qcLabelSelect").value, aSel = document.getElementById("qcAccountSelect");
     aSel.innerHTML = '<option value="">-- Select Account --</option>'; document.getElementById("quickCheckResultBox").style.display = "none"; document.getElementById("qcHeliBlock").style.display = "none";
@@ -1673,11 +1688,11 @@ function showSendableDetails(type) {
         html += '</div>'; 
         c.innerHTML = html; 
     }
-    document.getElementById("sendableDetailsModal").classList.add("show");
+    openModalSafe("sendableDetailsModal");
 }
 
 function showSendableAccountsForLabel(labelName, type) {
-    const c = document.getElementById("sendableDetailsList"), t = document.getElementById("sendableModalTitle"); c.innerHTML = "";
+  const c = document.getElementById("sendableDetailsList"), t = document.getElementById("sendableModalTitle"); c.innerHTML = "";
     let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
     let accountsWithSendable = getSendableData(type);
     
@@ -1706,7 +1721,7 @@ function showSendableAccountsForLabel(labelName, type) {
     c.innerHTML = html;
 }
 
-function closeSendableDetailsModal() { document.getElementById("sendableDetailsModal").classList.remove("show"); }
+function closeSendableDetailsModal() { closeModalSafe("sendableDetailsModal"); }
 
 // VAULT ASSET COUNTER BREAKDOWN MODAL LOGIC (Pop, HV, & Gold Status)
 function showVaultBreakdown(type) {
@@ -1768,10 +1783,10 @@ function showVaultBreakdown(type) {
         html += '</div>';
         c.innerHTML = html;
     }
-    document.getElementById("vaultBreakdownModal").classList.add("show");
+    openModalSafe("vaultBreakdownModal");
 }
 function closeVaultBreakdownModal() {
-    document.getElementById("vaultBreakdownModal").classList.remove("show");
+    closeModalSafe("vaultBreakdownModal");
 }
 
 // --- MAIN ACCOUNT STOCK VAULT SYSTEM (Single Account Setup) ---
