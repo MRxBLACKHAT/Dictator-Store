@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html> 
 <html lang="en">  
 <head>  
 <meta charset="UTF-8">  
@@ -1621,21 +1621,91 @@ function performQuickCheck() {
 }
 
 // SENDABLE BREAKDOWN DETAILS
-function showSendableDetails(type) {
-    const c = document.getElementById("sendableDetailsList"), t = document.getElementById("sendableModalTitle"); c.innerHTML = "";
-    let html = '<div style="display:flex; flex-direction:column; gap:8px;">', accountsWithSendable = [];
+function getSendableData(type) {
+    let accountsWithSendable = [];
     if (type === 'pop') {
-        t.innerHTML = `<span class="material-icons">online_prediction</span> Sendable Pop Details`; t.style.color = "var(--primary)";
         popLabelGroups.forEach(g => { g.accounts.forEach(a => { let s = a.pop || 0; if (s > 0) { let l = a.level || "Below 10 level"; let inst = 0, f15 = 0; if (l === "Level 30+") { inst = s; f15 = s; } else if (l === "Level 25+" || l === "Level 10+") { inst = Math.min(s, 24000); f15 = Math.min(s, 24000); } else { inst = 0; f15 = Math.min(s, 24000); } if (f15 > 0) { accountsWithSendable.push({ name: a.name, label: g.label, inst: inst, f15: f15, total: s, color: 'var(--primary)' }); } } }); });
         if (mainAccountData) { let mPop = 0; for(let key in mainAccountData.popBundles) { mPop += (Number(key) * (Number(mainAccountData.popBundles[key]) || 0)); } mPop += (Number(mainAccountData.pop50k) || 0) * 50000; if(mPop > 0) accountsWithSendable.push({ name: mainAccountData.name, label: "Main Vault", inst: mPop, f15: mPop, total: mPop, color: 'var(--primary)' }); }
     } else if (type === 'hv') {
-        t.innerHTML = `<span class="material-icons">online_prediction</span> Sendable HV Details`; t.style.color = "var(--success)";
         hvLabelGroups.forEach(g => { g.accounts.forEach(a => { let s = a.hv || 0; if (s > 0) { let l = a.level || "Below 10 level"; let inst = 0, f15 = 0; if (l === "Level 30+") { inst = s; f15 = s; } else if (l === "Level 25+") { inst = Math.min(s, 20000); f15 = Math.min(s, 20000); } else { inst = 0; f15 = Math.min(s, 20000); } if (f15 > 0) { accountsWithSendable.push({ name: a.name, label: g.label, inst: inst, f15: f15, total: s, color: 'var(--success)' }); } } }); });
         if (mainAccountData && mainAccountData.hv && Number(mainAccountData.hv) > 0) { let mHV = Number(mainAccountData.hv) * 100; accountsWithSendable.push({ name: mainAccountData.name, label: "Main Vault", inst: mHV, f15: mHV, total: mHV, color: 'var(--success)' }); }
     }
-    if (accountsWithSendable.length === 0) { c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No sendable stock found.</div>`; } else { accountsWithSendable.sort((a, b) => b.f15 - a.f15); accountsWithSendable.forEach(acc => { html += `<div style="background:var(--bg-color); padding:12px; border-radius:10px; border:1px solid var(--border);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><div><div style="font-weight:800; font-size:14px; color:var(--text-color);">${acc.name}</div><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">${acc.label}</div></div><div style="font-size:12px; font-weight:700; background:rgba(148, 163, 184, 0.1); padding:4px 8px; border-radius:6px; color:var(--text-muted);">Stock: ${formatStockValue(acc.total)}</div></div><div style="display:flex; justify-content:space-between; font-size:12px;"><div><span style="color:var(--text-muted); font-weight:600;">Instant:</span> <strong style="color:${acc.color};">${formatStockValue(acc.inst)}</strong></div><div><span style="color:var(--text-muted); font-weight:600;">After 15m:</span> <strong style="color:${acc.color};">${formatStockValue(acc.f15)}</strong></div></div></div>`; }); html += '</div>'; c.innerHTML = html; }
+    return accountsWithSendable;
+}
+
+function showSendableDetails(type) {
+    const c = document.getElementById("sendableDetailsList"), t = document.getElementById("sendableModalTitle"); c.innerHTML = "";
+    let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
+    let accountsWithSendable = getSendableData(type);
+    
+    t.innerHTML = `<span class="material-icons">online_prediction</span> Sendable ${type === 'pop' ? 'Pop' : 'HV'} Labels`; 
+    t.style.color = type === 'pop' ? 'var(--primary)' : 'var(--success)';
+
+    if (accountsWithSendable.length === 0) { 
+        c.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No sendable stock found.</div>`; 
+    } else { 
+        const grouped = {};
+        accountsWithSendable.forEach(acc => {
+            if (!grouped[acc.label]) grouped[acc.label] = { totalInst: 0, totalF15: 0, count: 0 };
+            grouped[acc.label].count++;
+            grouped[acc.label].totalInst += acc.inst;
+            grouped[acc.label].totalF15 += acc.f15;
+        });
+        
+        let iconColor = type === 'pop' ? 'var(--primary)' : 'var(--success)';
+        
+        Object.keys(grouped).sort().forEach(labelName => {
+            let gData = grouped[labelName];
+            html += `<div style="background:var(--card-bg); padding:16px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.03);" onclick="showSendableAccountsForLabel('${labelName}', '${type}')">
+                <div>
+                    <div style="font-weight:800; font-size:16px; color:${iconColor};">${labelName}</div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:4px; font-weight:600;">${gData.count} Accounts</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div style="text-align:right;">
+                        <div style="font-size:18px; font-weight:900; color:${iconColor};">${formatStockValue(gData.totalF15)}</div>
+                        <div style="font-size:10px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-top:2px;">15m Cap.</div>
+                    </div>
+                    <span class="material-icons" style="color:var(--text-muted); font-size:22px;">chevron_right</span>
+                </div>
+            </div>`;
+        });
+        html += '</div>'; 
+        c.innerHTML = html; 
+    }
     document.getElementById("sendableDetailsModal").classList.add("show");
 }
+
+function showSendableAccountsForLabel(labelName, type) {
+    const c = document.getElementById("sendableDetailsList"), t = document.getElementById("sendableModalTitle"); c.innerHTML = "";
+    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    let accountsWithSendable = getSendableData(type);
+    
+    let groupAccs = accountsWithSendable.filter(a => a.label === labelName);
+    groupAccs.sort((a, b) => b.f15 - a.f15);
+    
+    let iconColor = type === 'pop' ? 'var(--primary)' : 'var(--success)';
+    
+    // Switch the header to be a Back Button
+    t.innerHTML = `<div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="showSendableDetails('${type}')"><span class="material-icons" style="color:var(--text-color); font-size:20px; background:var(--bg-color); border:1px solid var(--border); border-radius:50%; padding:4px;">arrow_back</span> <span style="color:${iconColor};">${labelName}</span></div>`;
+    t.style.color = 'inherit';
+
+    groupAccs.forEach(acc => {
+        html += `<div style="background:var(--bg-color); padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);">
+            <div>
+                <div style="font-weight:800; font-size:14px; color:var(--text-color);">${acc.name}</div>
+                <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Stock: ${formatStockValue(acc.total)}</div>
+            </div>
+            <div style="display:flex; gap:15px; font-size:12px;">
+                <div style="text-align:center;"><div style="color:var(--text-muted); font-weight:600; margin-bottom:2px;">Inst</div><strong style="color:${acc.color};">${formatStockValue(acc.inst)}</strong></div>
+                <div style="text-align:center;"><div style="color:var(--text-muted); font-weight:600; margin-bottom:2px;">15m</div><strong style="color:${acc.color};">${formatStockValue(acc.f15)}</strong></div>
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    c.innerHTML = html;
+}
+
 function closeSendableDetailsModal() { document.getElementById("sendableDetailsModal").classList.remove("show"); }
 
 // VAULT ASSET COUNTER BREAKDOWN MODAL LOGIC (Pop, HV, & Gold Status)
