@@ -574,6 +574,20 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
     </div>
 </div>
 
+<div id="editInvoiceModal" class="invoice-modal">
+    <div class="invoice-modal-content" style="max-width: 400px; padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h3 style="margin:0; display:flex; align-items:center; gap:8px; color:var(--primary);"><span class="material-icons">edit</span> Edit Invoice</h3><button class="menu-btn" onclick="closeEditInvoiceModal()"><span class="material-icons">close</span></button></div>
+        <input type="hidden" id="editInvoiceId">
+        <div class="form-group"><label>Customer Name</label><input id="editInvCustomer"></div>
+        <div class="stats-grid">
+            <div class="form-group"><label>Total Amount (₹)</label><input type="number" id="editInvAmount" onfocus="if(this.value=='0')this.value=''" onblur="if(this.value=='')this.value='0'"></div>
+            <div class="form-group"><label>Paid Amount (₹)</label><input type="number" id="editInvPaid" onfocus="if(this.value=='0')this.value=''" onblur="if(this.value=='')this.value='0'"></div>
+        </div>
+        <div class="form-group"><label>Modification Note</label><input id="editInvNote" placeholder="E.g., Corrected spelling, updated amount"></div>
+        <button class="save-btn" onclick="saveInvoiceEdit()" style="display:flex; align-items:center; justify-content:center; gap:8px;"><span class="material-icons">save</span> Save Changes</button>
+    </div>
+</div>
+
 <script>  
 function formatStockValue(v) {
     if (!v) return "0"; const a = Math.abs(v);
@@ -894,9 +908,17 @@ function showInvoice(inv){
     let det = inv.details.includes("<div") ? inv.details : `<div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;"><span><b style="color:#0f172a; font-size:15px;">${inv.item}</b><br><span style="color:#64748b; font-size:14px;">${inv.details}</span></span><b style="font-size:16px; color:#0f172a;">₹${inv.amount.toLocaleString()}</b></div>`;
     const paid = Number(inv.paid || 0); const due = Math.max(0, inv.amount - paid);
     let summaryHtml = `<div style="background-color: #fafafa; border-top: 2px solid #000000; border-bottom: 2px solid #000000; padding: 15px 12px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div style="font-size: 13px; font-weight: 700; color: #64748b; text-transform:uppercase;">Subtotal</div><div style="font-size: 15px; font-weight: 800; color: #000000;">₹${inv.amount.toLocaleString()}</div></div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #cbd5e1;"><div style="font-size: 13px; font-weight: 700; color: #10b981; text-transform:uppercase;">Amount Paid</div><div style="font-size: 15px; font-weight: 800; color: #10b981;">- ₹${paid.toLocaleString()}</div></div><div style="display: flex; justify-content: space-between; align-items: center;"><div style="font-size: 15px; font-weight: 900; color: #000000; text-transform:uppercase;">Balance Due</div><div style="font-size: 24px; font-weight: 900; color: ${due > 0 ? '#ef4444' : '#10b981'};">₹${due.toLocaleString()}</div></div></div>`;
-    document.getElementById("invoicePreviewContent").innerHTML=`<div id="printInvoice" style="background-color:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08); border:1px solid #e2e8f0; position:relative; font-family:'Inter', Arial, sans-serif;"><div style="background-color: #000000; color: white; padding: 25px 20px; text-align: center;"><h2 style="margin: 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase; font-weight:900;">Dictator E-Store</h2><div style="font-size: 11px; color:#a1a1aa; margin-top: 6px; font-weight:600; letter-spacing: 3px; text-transform:uppercase;">OFFICIAL INVOICE</div></div><div style="padding: 20px;"><div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;"><div><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; font-weight:700;">Billed To</div><div style="font-size: 18px; font-weight: 900; color: #000000;">${inv.customer}</div></div><div style="text-align: right;"><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; font-weight:700;">Invoice No</div><div style="font-weight: 800; color: #000000; font-size: 14px; margin-bottom: 8px;">${inv.invoiceId}</div><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; font-weight:700;">Date</div><div style="font-weight: 700; color: #000000; font-size: 12px;">${inv.date.split(',')[0]}</div></div></div><div style="margin-bottom: 20px;"><div style="display: flex; justify-content: space-between; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #000000; padding-bottom: 8px; margin-bottom: 15px; font-weight:800;"><div>Item Description</div><div>Amount</div></div><div style="color: #0f172a; line-height: 1.6;">${det}</div></div>${summaryHtml}<div style="text-align:center; margin-top:25px; font-size:11px; color:#94a3b8; font-weight:600;">Thank you for your business!</div></div></div><button class="save-btn btn-black" style="margin-top:20px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="downloadInvoice()"><span class="material-icons">print</span> View / Print</button>`;  
+    
+    let modHtml = "";
+    if (inv.modifications && inv.modifications.length > 0) {
+        modHtml = `<div style="margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 15px;"><div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; margin-bottom:8px;">Modifications</div>`;
+        inv.modifications.forEach(m => { modHtml += `<div style="font-size:12px; color:#475569; margin-bottom:4px;"><b>${m.date}:</b> ${m.note}</div>`; });
+        modHtml += `</div>`;
+    }
+    
+    document.getElementById("invoicePreviewContent").innerHTML=`<div id="printInvoice" style="background-color:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08); border:1px solid #e2e8f0; position:relative; font-family:'Inter', Arial, sans-serif;"><div style="background-color: #000000; color: white; padding: 25px 20px; text-align: center;"><h2 style="margin: 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase; font-weight:900;">Dictator E-Store</h2><div style="font-size: 11px; color:#a1a1aa; margin-top: 6px; font-weight:600; letter-spacing: 3px; text-transform:uppercase;">OFFICIAL INVOICE</div></div><div style="padding: 20px;"><div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;"><div><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; font-weight:700;">Billed To</div><div style="font-size: 18px; font-weight: 900; color: #000000;">${inv.customer}</div></div><div style="text-align: right;"><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; font-weight:700;">Invoice No</div><div style="font-weight: 800; color: #000000; font-size: 14px; margin-bottom: 8px;">${inv.invoiceId}</div><div style="color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; font-weight:700;">Date</div><div style="font-weight: 700; color: #000000; font-size: 12px;">${inv.date.split(',')[0]}</div></div></div><div style="margin-bottom: 20px;"><div style="display: flex; justify-content: space-between; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #000000; padding-bottom: 8px; margin-bottom: 15px; font-weight:800;"><div>Item Description</div><div>Amount</div></div><div style="color: #0f172a; line-height: 1.6;">${det}</div></div>${summaryHtml}${modHtml}<div style="text-align:center; margin-top:25px; font-size:11px; color:#94a3b8; font-weight:600;">Thank you for your business!</div></div></div><button class="save-btn btn-black" style="margin-top:20px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="downloadInvoice()"><span class="material-icons">print</span> View / Print</button>`;  
         openModalSafe("invoiceModal");
-}  
+}
 function closeInvoiceModal() { closeModalSafe("invoiceModal"); }
 
 function renderMultiOrders(){  
@@ -917,12 +939,48 @@ function deleteSingleInvoice(id){ if(confirm("Delete this invoice?")){ invoices 
 function renderInvoiceHistory(){  
     const c = document.getElementById("invoiceHistory"); if(!c) return; c.innerHTML = "";  
     [...invoices].reverse().forEach(i=>{  
-        c.innerHTML += `<div class="order-card" style="display:flex; flex-direction:column; gap:12px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><div class="order-id" style="color:var(--text-color); background-color:var(--bg-color); border:1px solid var(--border);">${i.invoiceId}</div><div style="font-weight:800; font-size:16px; margin-top:8px;">${i.customer}</div><div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${i.date.split(',')[0]}</div></div><div style="text-align:right;"><div style="font-weight:900; font-size:20px;">₹${i.amount.toLocaleString()}</div><button class="menu-btn" style="margin-top:8px; display:inline-flex; float:right;" onclick="deleteSingleInvoice('${i.invoiceId}')"><span class="material-icons" style="color:var(--danger); font-size:20px;">delete</span></button></div></div><div style="margin-top:10px;"><button class="action-btn btn-dark" style="width:100%; padding:12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size:13px;" onclick="viewInvoice('${i.invoiceId}')"><span class="material-icons" style="font-size:18px;">visibility</span> View</button></div></div>`;  
+        c.innerHTML += `<div class="order-card" style="display:flex; flex-direction:column; gap:12px;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div><div class="order-id" style="color:var(--text-color); background-color:var(--bg-color); border:1px solid var(--border);">${i.invoiceId}</div><div style="font-weight:800; font-size:16px; margin-top:8px;">${i.customer}</div><div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${i.date.split(',')[0]}</div></div><div style="text-align:right;"><div style="font-weight:900; font-size:20px;">₹${i.amount.toLocaleString()}</div><button class="menu-btn" style="margin-top:8px; display:inline-flex; float:right;" onclick="deleteSingleInvoice('${i.invoiceId}')"><span class="material-icons" style="color:var(--danger); font-size:20px;">delete</span></button></div></div><div style="display:flex; gap:10px; margin-top:10px;"><button class="action-btn btn-dark" style="flex:1; padding:12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size:13px;" onclick="viewInvoice('${i.invoiceId}')"><span class="material-icons" style="font-size:18px;">visibility</span> View</button><button class="action-btn btn-blue" style="flex:1; padding:12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size:13px;" onclick="openEditInvoice('${i.invoiceId}')"><span class="material-icons" style="font-size:18px;">edit</span> Edit</button></div></div>`;  
     });  
 }  
 
 function viewInvoice(id){ const inv = invoices.find(i=>i.invoiceId===id); if(!inv) return; showInvoice(inv); }
 function deleteAllInvoices(){ if(confirm("Delete all invoices?")){ invoices = []; localStorage.setItem("des_invoices",JSON.stringify(invoices)); renderInvoiceHistory(); } }  
+
+function openEditInvoice(id) {
+    const inv = invoices.find(i => i.invoiceId === id);
+    if(!inv) return;
+    document.getElementById("editInvoiceId").value = id;
+    document.getElementById("editInvCustomer").value = inv.customer;
+    document.getElementById("editInvAmount").value = inv.amount;
+    document.getElementById("editInvPaid").value = inv.paid || 0;
+    document.getElementById("editInvNote").value = "";
+    openModalSafe("editInvoiceModal");
+}
+
+function closeEditInvoiceModal() {
+    closeModalSafe("editInvoiceModal");
+}
+
+function saveInvoiceEdit() {
+    const id = document.getElementById("editInvoiceId").value;
+    const inv = invoices.find(i => i.invoiceId === id);
+    if(!inv) return;
+    
+    inv.customer = document.getElementById("editInvCustomer").value;
+    inv.amount = Number(document.getElementById("editInvAmount").value || 0);
+    inv.paid = Number(document.getElementById("editInvPaid").value || 0);
+    
+    const note = document.getElementById("editInvNote").value.trim();
+    if(note) {
+        if(!inv.modifications) inv.modifications = [];
+        inv.modifications.push({ date: new Date().toLocaleString(), note: note });
+    }
+    
+    localStorage.setItem("des_invoices", JSON.stringify(invoices));
+    closeEditInvoiceModal();
+    renderInvoiceHistory();
+}
+
 function toggleMenu(id){ document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("show")); document.getElementById("menu-"+id).classList.toggle("show"); }  
 function deleteOrder(id){ if(confirm("Delete order?")){ orders = orders.filter(o=>o.id!==id); localStorage.setItem("des_orders",JSON.stringify(orders)); renderOrders(); updateDashboard(); loadInvoiceOrders(); renderMultiOrders(); renderLedger(); } }  
   
