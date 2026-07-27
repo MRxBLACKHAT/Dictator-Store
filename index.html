@@ -79,13 +79,14 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
     <div class="header">  
         <h1>Dictator OS</h1><p>Business Analytics Dashboard</p>  
     </div>  
-    <div class="stats-grid">  
-        <div class="stat-card"><div class="stat-title">Net Profit</div><div class="stat-value" id="profitAmount" style="color: var(--success);">₹0</div></div>  
-        <div class="stat-card"><div class="stat-title">Total Orders</div><div class="stat-value" id="totalOrders">0</div></div>  
-        <div class="stat-card"><div class="stat-title">Pending</div><div class="stat-value" id="pendingOrders" style="color: var(--warning);">0</div></div>  
-        <div class="stat-card"><div class="stat-title">Paid</div><div class="stat-value" id="paidOrders" style="color: var(--primary);">0</div></div>  
+            <div class="stats-grid">  
+        <div class="stat-card" style="cursor: pointer;" onclick="showDashboardStatDetails('profit')"><div class="stat-title">Net Profit</div><div class="stat-value" id="profitAmount" style="color: var(--success);">₹0</div></div>  
+        <div class="stat-card" style="cursor: pointer;" onclick="showDashboardStatDetails('total')"><div class="stat-title">Total Orders</div><div class="stat-value" id="totalOrders">0</div></div>  
+        <div class="stat-card" style="cursor: pointer;" onclick="showDashboardStatDetails('pending')"><div class="stat-title">Pending</div><div class="stat-value" id="pendingOrders" style="color: var(--warning);">0</div></div>  
+        <div class="stat-card" style="cursor: pointer;" onclick="showDashboardStatDetails('paid')"><div class="stat-title">Paid</div><div class="stat-value" id="paidOrders" style="color: var(--primary);">0</div></div>  
     </div>  
-    <div class="action-grid">  
+
+   <div class="action-grid">  
         <button class="action-btn btn-blue" onclick="showPage('ordersPage')"><span class="material-icons" style="font-size:20px; vertical-align:middle;">add_circle</span> New Order</button>  
         <button class="action-btn btn-purple" onclick="showPage('resellPage')"><span class="material-icons" style="font-size:20px; vertical-align:middle;">storefront</span> New Resell</button>  
         <button class="action-btn btn-dark" onclick="showPage('stockPage')"><span class="material-icons" style="font-size:20px; vertical-align:middle;">inventory_2</span> Stock Peek</button>  
@@ -588,6 +589,17 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
     </div>
 </div>
 
+<div id="dashboardStatsModal" class="invoice-modal">
+    <div class="invoice-modal-content" style="max-width: 400px; padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 id="dashStatModalTitle" style="margin:0; display:flex; align-items:center; gap:8px;">Stats</h3>
+            <button class="menu-btn" onclick="closeDashboardStatsModal()"><span class="material-icons">close</span></button>
+        </div>
+        <div id="dashStatModalContent"></div>
+    </div>
+</div>
+
+
 <script>  
 function formatStockValue(v) {
     if (!v) return "0"; const a = Math.abs(v);
@@ -864,6 +876,139 @@ function updateDashboard(){
     resellOrders.forEach(o=>{ if(o.status === "Paid"){ profit += Number(o.profit); } });  
     document.getElementById("profitAmount").innerText = "₹" + profit.toLocaleString(); document.getElementById("totalOrders").innerText = orders.length; document.getElementById("paidOrders").innerText = paid; document.getElementById("pendingOrders").innerText = pending;  
 }  
+
+function showDashboardStatDetails(type) {
+    const t = document.getElementById("dashStatModalTitle"), c = document.getElementById("dashStatModalContent");
+    c.innerHTML = "";
+    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+
+    let directProfit = 0, directPaid = 0, directPending = 0, directPendingAmt = 0;
+    orders.forEach(o => { 
+        if(o.status === "Paid") { directProfit += Number(o.amount); directPaid++; } 
+        else { directPending++; directPendingAmt += Number(o.amount); } 
+    });
+
+    let resellProfit = 0, resellPaid = 0, resellPending = 0, resellPendingAmt = 0;
+    resellOrders.forEach(o => { 
+        if(o.status === "Paid") { resellProfit += Number(o.profit); resellPaid++; } 
+        else { resellPending++; resellPendingAmt += Number(o.profit); } 
+    });
+
+    if (type === 'profit') {
+        t.innerHTML = `<span class="material-icons" style="color:var(--success);">account_balance_wallet</span> Profit Breakdown`;
+        html += `<div onclick="renderSubStatList('direct_paid', 'Direct Orders Revenue', 'profit')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:var(--bg-color); border:1px solid var(--border); border-radius:10px;"><span>Direct Orders Revenue <span class="material-icons" style="font-size:14px; vertical-align:middle; color:var(--text-muted);">chevron_right</span></span><strong style="color:var(--success);">₹${directProfit.toLocaleString()}</strong></div>`;
+        html += `<div onclick="renderSubStatList('resell_paid', 'Resell Profit', 'profit')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:var(--bg-color); border:1px solid var(--border); border-radius:10px;"><span>Resell Profit <span class="material-icons" style="font-size:14px; vertical-align:middle; color:var(--text-muted);">chevron_right</span></span><strong style="color:var(--success);">₹${resellProfit.toLocaleString()}</strong></div>`;
+        html += `<div style="display:flex; justify-content:space-between; padding:12px; background:rgba(16, 185, 129, 0.1); border:1px dashed var(--success); border-radius:10px;"><span style="color:var(--success); font-weight:700;">Total Net Profit</span><strong style="color:var(--success); font-size:18px;">₹${(directProfit + resellProfit).toLocaleString()}</strong></div>`;
+    } else if (type === 'total') {
+        t.innerHTML = `<span class="material-icons" style="color:var(--secondary);">shopping_bag</span> Total Orders`;
+        html += `<div onclick="renderSubStatList('direct_all', 'Direct Orders', 'total')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:var(--bg-color); border:1px solid var(--border); border-radius:10px;"><span>Direct Orders <span class="material-icons" style="font-size:14px; vertical-align:middle; color:var(--text-muted);">chevron_right</span></span><strong>${orders.length}</strong></div>`;
+        html += `<div onclick="renderSubStatList('resell_all', 'Resell Pipeline', 'total')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:var(--bg-color); border:1px solid var(--border); border-radius:10px;"><span>Resell Pipeline <span class="material-icons" style="font-size:14px; vertical-align:middle; color:var(--text-muted);">chevron_right</span></span><strong>${resellOrders.length}</strong></div>`;
+        html += `<div style="display:flex; justify-content:space-between; padding:12px; background:rgba(124, 58, 237, 0.1); border:1px dashed var(--secondary); border-radius:10px;"><span style="color:var(--secondary); font-weight:700;">Combined Total</span><strong style="color:var(--secondary); font-size:18px;">${orders.length + resellOrders.length}</strong></div>`;
+    } else if (type === 'pending') {
+        t.innerHTML = `<span class="material-icons" style="color:var(--warning);">hourglass_empty</span> Pending Operations`;
+        html += `<div onclick="renderSubStatList('direct_pending', 'Pending Direct Orders', 'pending')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--bg-color); border:1px solid var(--border); border-radius:10px;"><div><div style="font-weight:700;">Direct Orders <span class="material-icons" style="font-size:14px; vertical-align:middle; color:var(--text-muted);">chevron_right</span></div><div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Pending Payment</div></div><div style="text-align:right;"><strong>${directPending}</strong><div style="font-size:11px; color:var(--warning);">₹${directPendingAmt.toLocaleString()}</div></div></div>`;
+        html += `<div onclick="renderSubStatList('resell_pending', 'Pending Resell Orders', 'pending')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--bg-color); border:1px solid var(--border); border-radius:10px;"><div><div style="font-weight:700;">Resell Orders <span class="material-icons" style="font-size:14px; vertical-align:middle; color:var(--text-muted);">chevron_right</span></div><div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Pending Collection</div></div><div style="text-align:right;"><strong>${resellPending}</strong><div style="font-size:11px; color:var(--warning);">₹${resellPendingAmt.toLocaleString()}</div></div></div>`;
+        html += `<div style="display:flex; justify-content:space-between; padding:12px; background:rgba(245, 158, 11, 0.1); border:1px dashed var(--warning); border-radius:10px;"><span style="color:var(--warning); font-weight:700;">Total Pending Actions</span><strong style="color:var(--warning); font-size:18px;">${directPending + resellPending}</strong></div>`;
+    } else if (type === 'paid') {
+        t.innerHTML = `<span class="material-icons" style="color:var(--primary);">check_circle</span> Completed (Paid)`;
+        html += `<div onclick="renderSubStatList('direct_paid', 'Completed Direct Orders', 'paid')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:var(--bg-color); border:1px solid var(--border); border-radius:10px;"><span>Direct Orders <span class="material-icons" style="font-size:14px; vertical-align:middle; color:var(--text-muted);">chevron_right</span></span><strong style="color:var(--primary);">${directPaid}</strong></div>`;
+        html += `<div onclick="renderSubStatList('resell_paid', 'Completed Resell Orders', 'paid')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:var(--bg-color); border:1px solid var(--border); border-radius:10px;"><span>Resell Orders <span class="material-icons" style="font-size:14px; vertical-align:middle; color:var(--text-muted);">chevron_right</span></span><strong style="color:var(--primary);">${resellPaid}</strong></div>`;
+        html += `<div style="display:flex; justify-content:space-between; padding:12px; background:rgba(37, 99, 235, 0.1); border:1px dashed var(--primary); border-radius:10px;"><span style="color:var(--primary); font-weight:700;">Total Completed</span><strong style="color:var(--primary); font-size:18px;">${directPaid + resellPaid}</strong></div>`;
+    }
+
+    html += '</div>';
+    c.innerHTML = html;
+    openModalSafe("dashboardStatsModal");
+}
+
+function renderSubStatList(listType, title, parentType) {
+    const t = document.getElementById("dashStatModalTitle"), c = document.getElementById("dashStatModalContent");
+    
+    // Back button in the title
+    t.innerHTML = `<div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="showDashboardStatDetails('${parentType}')"><span class="material-icons" style="font-size:20px; background:var(--bg-color); border:1px solid var(--border); border-radius:50%; padding:4px;">arrow_back</span> <span style="font-size:18px;">${title}</span></div>`;
+
+    let listHtml = '<div style="display:flex; flex-direction:column; gap:10px; max-height: 60vh; overflow-y: auto; padding-right:5px;">';
+    let items = [];
+    let isResell = listType.startsWith('resell');
+    
+    if (listType === 'direct_paid') items = orders.filter(o => o.status === "Paid");
+    else if (listType === 'resell_paid') items = resellOrders.filter(o => o.status === "Paid");
+    else if (listType === 'direct_all') items = orders;
+    else if (listType === 'resell_all') items = resellOrders;
+    else if (listType === 'direct_pending') items = orders.filter(o => o.status !== "Paid");
+    else if (listType === 'resell_pending') items = resellOrders.filter(o => o.status !== "Paid");
+
+    if (items.length === 0) {
+        listHtml += `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-style:italic;">No records found.</div>`;
+    } else {
+        [...items].reverse().forEach(o => {
+            let amt = isResell ? o.profit : o.amount;
+            let badge = o.status === "Paid" ? "var(--success)" : "var(--warning)";
+            let badgeBg = o.status === "Paid" ? "rgba(22, 163, 74, 0.1)" : "rgba(245, 158, 11, 0.1)";
+            
+            listHtml += `<div onclick="showOrderDetailsFromStat('${o.id}', ${isResell}, '${listType}', '${title}', '${parentType}')" style="cursor:pointer; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                    <div>
+                        <div style="font-weight:800; font-size:14px; display:flex; align-items:center; gap:4px;">${o.customer} <span class="material-icons" style="font-size:16px; color:var(--text-muted);">chevron_right</span></div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${o.id} &bull; ${isResell ? o.qty+'K' : o.item}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-weight:900; font-size:16px;">₹${Number(amt).toLocaleString()}</div>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:8px;">
+                    <div style="font-size:10px; color:var(--text-muted);">${o.date.split(',')[0]}</div>
+                    <div style="font-size:10px; font-weight:700; color:${badge}; background-color:${badgeBg}; padding:2px 6px; border-radius:4px; text-transform:uppercase;">${o.status}</div>
+                </div>
+            </div>`;
+        });
+    }
+    listHtml += '</div>';
+    c.innerHTML = listHtml;
+}
+
+function showOrderDetailsFromStat(id, isResell, listType, listTitle, parentType) {
+    const t = document.getElementById("dashStatModalTitle"), c = document.getElementById("dashStatModalContent");
+    
+    let o = isResell ? resellOrders.find(x => x.id === id) : orders.find(x => x.id === id);
+    if (!o) return;
+
+    t.innerHTML = `<div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="renderSubStatList('${listType}', '${listTitle}', '${parentType}')"><span class="material-icons" style="font-size:20px; background:var(--bg-color); border:1px solid var(--border); border-radius:50%; padding:4px;">arrow_back</span> <span style="font-size:18px;">Order Info</span></div>`;
+
+    let badge = o.status === "Paid" ? "var(--success)" : "var(--warning)";
+    let badgeBg = o.status === "Paid" ? "rgba(22, 163, 74, 0.1)" : "rgba(245, 158, 11, 0.1)";
+
+    let html = `<div style="background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:20px;">`;
+    
+    html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; border-bottom:1px dashed var(--border); padding-bottom:15px;">
+        <div style="font-size:14px; font-weight:900; background:rgba(37, 99, 235, 0.1); color:var(--primary); padding:6px 10px; border-radius:8px;">${o.id}</div>
+        <div style="font-size:12px; font-weight:800; color:${badge}; background-color:${badgeBg}; padding:6px 12px; border-radius:8px; text-transform:uppercase;">${o.status}</div>
+    </div>`;
+
+    html += `<div style="margin-bottom:16px;"><div style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Customer Name</div><div style="font-size:20px; font-weight:900;">${o.customer}</div></div>`;
+
+    if (isResell) {
+        html += `<div style="margin-bottom:16px;"><div style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Item Supplied</div><div style="font-size:16px; font-weight:700;">${o.item}</div></div>`;
+        html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">`;
+        html += `<div><div style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Quantity</div><div style="font-size:16px; font-weight:700;">${o.qty}K</div></div>`;
+        html += `<div><div style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Margin</div><div style="font-size:16px; font-weight:700;">₹${o.margin}/M</div></div>`;
+        html += `</div>`;
+        html += `<div style="margin-bottom:16px; background:rgba(16, 185, 129, 0.05); border:1px solid rgba(16, 185, 129, 0.2); padding:12px; border-radius:10px;"><div style="font-size:12px; color:var(--success); font-weight:800; text-transform:uppercase; margin-bottom:4px;">Total Profit</div><div style="font-size:26px; font-weight:900; color:var(--success);">₹${Number(o.profit).toLocaleString()}</div></div>`;
+    } else {
+        html += `<div style="margin-bottom:16px;"><div style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Category</div><div style="font-size:16px; font-weight:700;">${o.item}</div></div>`;
+        html += `<div style="margin-bottom:16px;"><div style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Fulfillment Details</div><div style="font-size:16px; font-weight:700;">${o.details}</div></div>`;
+        html += `<div style="margin-bottom:16px; background:var(--bg-color); border:1px solid var(--border); padding:12px; border-radius:10px;"><div style="font-size:12px; color:var(--text-muted); font-weight:800; text-transform:uppercase; margin-bottom:4px;">Total Amount</div><div style="font-size:26px; font-weight:900; color:var(--text-color);">₹${Number(o.amount).toLocaleString()}</div></div>`;
+    }
+
+    html += `<div style="border-top:1px dashed var(--border); padding-top:15px; margin-top:5px;"><div style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Date Processed</div><div style="font-size:13px; font-weight:700;">${o.date}</div></div>`;
+    
+    html += `</div>`;
+    c.innerHTML = html;
+}
+
+function closeDashboardStatsModal() {
+    closeModalSafe("dashboardStatsModal");
+}
 function downloadInvoice(){  
     const el = document.getElementById("printInvoice"); if(!el) return alert("Generate invoice first");  
     const nw = window.open("","_blank"); nw.document.write(`<html><head><title>Invoice</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>body{font-family:'Inter', sans-serif; padding:20px; background-color:#f1f5f9;}</style></head><body><div style="max-width:700px; margin:auto;">${el.outerHTML}</div></body></html>`);  
