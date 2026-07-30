@@ -174,13 +174,18 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
         <div id="stockItemFields">
             <div class="form-group"><label>Fulfillment Method</label><select id="fulfillmentMethod" onchange="toggleFulfillmentFields()"><option value="manual">Manual Entry (External Stock)</option><option value="vault">Deduct from Vault (Internal Stock)</option></select></div>
             <div id="manualFulfillmentFields"><div class="stats-grid"><div class="form-group"><label>Quantity</label><input type="number" id="manualQuantity" placeholder="0"></div><div class="form-group"><label>Unit</label><select id="manualUnit"><option>K</option><option>M</option></select></div></div></div>
-            <div id="vaultFulfillmentFields" style="display:none; padding:15px; border:1px dashed var(--primary); border-radius:12px; background-color:rgba(37, 99, 235, 0.05); margin-bottom:15px;">
+                        <div id="vaultFulfillmentFields" style="display:none; padding:15px; border:1px dashed var(--primary); border-radius:12px; background-color:rgba(37, 99, 235, 0.05); margin-bottom:15px;">
                 <div style="font-weight:700; font-size:14px; color:var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:6px;"><span class="material-icons" style="font-size:18px;">account_balance</span> Vault Source Deduction</div>
-                <div class="form-group"><label style="font-size:12px; color:var(--text-muted);">Select Label Group</label><select id="vaultLabel" onchange="updateVaultAccounts()"></select></div>
-                <div class="stats-grid"><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">From Account</label><select id="vaultFrom" onchange="calculateVaultQty()"></select></div><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">To Account</label><select id="vaultTo" onchange="calculateVaultQty()"></select></div></div>
+                <div class="stats-grid">
+                    <div class="form-group"><label style="font-size:12px; color:var(--text-muted);">Select Label Group</label><select id="vaultLabel" onchange="updateVaultAccounts()"></select></div>
+                    <div class="form-group"><label style="font-size:12px; color:var(--text-muted);">Selection Mode</label><select id="vaultSelectionMode" onchange="toggleVaultSelectionMode()"><option value="range">Range (From/To)</option><option value="individual">Specific Accounts</option></select></div>
+                </div>
+                <div id="vaultRangeDiv" class="stats-grid"><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">From Account</label><select id="vaultFrom" onchange="calculateVaultQty()"></select></div><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">To Account</label><select id="vaultTo" onchange="calculateVaultQty()"></select></div></div>
+                <div id="vaultIndividualDiv" class="form-group" style="display:none;"><label style="font-size:12px; color:var(--text-muted);">Select Accounts</label><div id="vaultIndivContainer" style="max-height: 140px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--bg-color); display: flex; flex-direction: column; gap: 10px;"></div></div>
                 <div class="stats-grid"><div class="form-group"><label style="font-size:12px; color:var(--text-muted);">Amount / Acc</label><select id="vaultAmount" onchange="toggleVaultCustom()"></select></div><div class="form-group" id="vaultCustomDiv" style="display:none;"><label style="font-size:12px; color:var(--text-muted);">Custom Amount</label><input type="number" id="vaultCustomAmount" placeholder="e.g. 50" oninput="calculateVaultQty()"></div></div>
                 <div style="font-size:15px; color:var(--text-color); font-weight:800; text-align:right; margin-top:5px; background:var(--card-bg); padding:8px 12px; border-radius:8px; border:1px solid var(--border);" id="vaultCalculatedQty">Total Deduction: 0</div>
             </div>
+
             <div class="form-group"><label>Rate (per K or ea)</label><input type="number" id="rate" placeholder="₹0"></div>  
         </div>  
         <div id="ucFields" style="display:none"><div class="form-group"><label>UC Pack</label><select id="ucPack"><option value="60 UC">60 UC</option><option value="325 UC">325 UC</option><option value="660 UC">660 UC</option><option value="1800 UC">1800 UC</option><option value="3850 UC">3850 UC</option><option value="7500 UC">7500 UC</option></select></div><div class="form-group"><label>Amount</label><input type="number" id="ucAmount" placeholder="₹0"></div></div>  
@@ -584,6 +589,21 @@ h2, h3 { letter-spacing: -0.5px; margin-bottom: 15px; font-weight: 800; transiti
             <div class="form-group"><label>Total Amount (₹)</label><input type="number" id="editInvAmount" onfocus="if(this.value=='0')this.value=''" onblur="if(this.value=='')this.value='0'"></div>
             <div class="form-group"><label>Paid Amount (₹)</label><input type="number" id="editInvPaid" onfocus="if(this.value=='0')this.value=''" onblur="if(this.value=='')this.value='0'"></div>
         </div>
+        
+        <div class="form-group">
+            <label style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">Current Bill Items</label>
+            <div id="editInvCurrentItems" style="max-height:140px; overflow-y:auto; background:var(--bg-color); border:1px solid var(--border); border-radius:12px; padding:12px; font-size:13px; line-height:1.4;"></div>
+        </div>
+        
+        <div class="card" style="padding:12px; margin-bottom:15px; border:1px dashed var(--primary); background:rgba(37, 99, 235, 0.02);">
+            <label style="font-size:12px; color:var(--primary); margin-bottom:8px;">➕ Append Existing Order</label>
+            <div style="display:flex; gap:8px;">
+                <select id="editInvAddOrder" style="flex:1; padding:10px; font-size:13px;"></select>
+                <button class="action-btn btn-blue" style="padding:10px 14px; border-radius:10px;" onclick="addOrderToEditedInvoice()"><span class="material-icons" style="font-size:18px;">add</span></button>
+            </div>
+            <div id="editInvAppendSuccess" style="font-size:11px; color:var(--success); font-weight:700; margin-top:6px; display:none;">Order added! Click Save to confirm.</div>
+        </div>
+
         <div class="form-group"><label>Modification Note</label><input id="editInvNote" placeholder="E.g., Corrected spelling, updated amount"></div>
         <button class="save-btn" onclick="saveInvoiceEdit()" style="display:flex; align-items:center; justify-content:center; gap:8px;"><span class="material-icons">save</span> Save Changes</button>
     </div>
@@ -721,20 +741,40 @@ function loadVaultLabels() {
 }
 
 function updateVaultAccounts() {
-    const item = document.getElementById("itemType").value, lIdx = document.getElementById("vaultLabel").value, fSel = document.getElementById("vaultFrom"), tSel = document.getElementById("vaultTo");
-    if (!fSel || !tSel) return; fSel.innerHTML = ""; tSel.innerHTML = ""; if (lIdx === "") { calculateVaultQty(); return; }
+    const item = document.getElementById("itemType").value, lIdx = document.getElementById("vaultLabel").value, fSel = document.getElementById("vaultFrom"), tSel = document.getElementById("vaultTo"), indivC = document.getElementById("vaultIndivContainer");
+    if (!fSel || !tSel || !indivC) return; fSel.innerHTML = ""; tSel.innerHTML = ""; indivC.innerHTML = ""; if (lIdx === "") { calculateVaultQty(); return; }
     let groups = item === "Popularity" ? popLabelGroups : (item === "Home Votes" ? hvLabelGroups : heliLabelGroups); const g = groups[lIdx]; if (!g) return;
-    g.accounts.forEach((acc, i) => { fSel.innerHTML += `<option value="${i}">${acc.name}</option>`; tSel.innerHTML += `<option value="${i}">${acc.name}</option>`; });
+    g.accounts.forEach((acc, i) => { 
+        fSel.innerHTML += `<option value="${i}">${acc.name}</option>`; 
+        tSel.innerHTML += `<option value="${i}">${acc.name}</option>`; 
+        indivC.innerHTML += `<label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer;"><input type="checkbox" class="vault-indiv-cb" value="${i}" onchange="calculateVaultQty()" style="width:16px; height:16px; margin:0; accent-color:var(--primary);"> ${acc.name}</label>`;
+    });
+    calculateVaultQty();
+}
+
+function toggleVaultSelectionMode() {
+    const mode = document.getElementById("vaultSelectionMode").value;
+    document.getElementById("vaultRangeDiv").style.display = mode === "range" ? "grid" : "none";
+    document.getElementById("vaultIndividualDiv").style.display = mode === "range" ? "none" : "block";
     calculateVaultQty();
 }
 
 function toggleVaultCustom() { document.getElementById("vaultCustomDiv").style.display = document.getElementById("vaultAmount").value === "custom" ? "block" : "none"; calculateVaultQty(); }
 
 function calculateVaultQty() {
-    const f = parseInt(document.getElementById("vaultFrom").value), t = parseInt(document.getElementById("vaultTo").value), amtSel = document.getElementById("vaultAmount").value;
+    const mode = document.getElementById("vaultSelectionMode") ? document.getElementById("vaultSelectionMode").value : "range";
+    let count = 0;
+    if (mode === "range") {
+        const f = parseInt(document.getElementById("vaultFrom").value), t = parseInt(document.getElementById("vaultTo").value);
+        if (!isNaN(f) && !isNaN(t)) count = Math.abs(t - f) + 1;
+    } else {
+        count = document.querySelectorAll('.vault-indiv-cb:checked').length;
+    }
+    
+    const amtSel = document.getElementById("vaultAmount").value;
     let perAcc = amtSel === "custom" ? Number(document.getElementById("vaultCustomAmount").value || 0) : Number(amtSel);
-    if (!isNaN(f) && !isNaN(t) && perAcc > 0) { 
-        let count = Math.abs(t - f) + 1; 
+    
+    if (count > 0 && perAcc > 0) { 
         let unit = document.getElementById("itemType").value === "Helicopters" ? "" : "K";
         document.getElementById("vaultCalculatedQty").innerText = `Total Deduction: ${count * perAcc}${unit}`; 
     } else { document.getElementById("vaultCalculatedQty").innerText = `Total Deduction: 0`; }
@@ -762,12 +802,20 @@ function calculateAmount(){
     const method = document.getElementById("fulfillmentMethod").value, rate = Number(document.getElementById("rate").value || 0);
     if (method === "manual") { const qty = Number(document.getElementById("manualQuantity").value || 0), unit = document.getElementById("manualUnit").value; return unit === "M" ? qty * 1000 * rate : qty * rate; } 
     else {
-        const f = parseInt(document.getElementById("vaultFrom").value), t = parseInt(document.getElementById("vaultTo").value), amtSel = document.getElementById("vaultAmount").value;
+        const mode = document.getElementById("vaultSelectionMode") ? document.getElementById("vaultSelectionMode").value : "range";
+        let count = 0;
+        if (mode === "range") {
+            const f = parseInt(document.getElementById("vaultFrom").value), t = parseInt(document.getElementById("vaultTo").value);
+            if (!isNaN(f) && !isNaN(t)) count = Math.abs(t - f) + 1;
+        } else {
+            count = document.querySelectorAll('.vault-indiv-cb:checked').length;
+        }
+        const amtSel = document.getElementById("vaultAmount").value;
         let perAcc = amtSel === "custom" ? Number(document.getElementById("vaultCustomAmount").value || 0) : Number(amtSel);
-        if (!isNaN(f) && !isNaN(t) && perAcc > 0) return (Math.abs(t - f) + 1) * perAcc * rate; return 0;
+        if (count > 0 && perAcc > 0) return count * perAcc * rate; return 0;
     }
 }  
-  
+
 function saveOrder() {  
     const item = document.getElementById("itemType").value; 
     let order = window.editingOrderId ? orders.find(o => o.id === window.editingOrderId) : { id: generateOrderId() };  
@@ -784,21 +832,33 @@ function saveOrder() {
             qtyK = mu === "M" ? mq * 1000 : mq; 
             order.details = item === "Helicopters" ? (mq + " @ ₹" + rate + "/ea") : (mq + mu + " @ ₹" + rate + "/K");
         } else {
-            const lIdx = document.getElementById("vaultLabel").value, fIdx = parseInt(document.getElementById("vaultFrom").value), tIdx = parseInt(document.getElementById("vaultTo").value), amtSel = document.getElementById("vaultAmount").value;
+            const lIdx = document.getElementById("vaultLabel").value, amtSel = document.getElementById("vaultAmount").value;
+            const mode = document.getElementById("vaultSelectionMode") ? document.getElementById("vaultSelectionMode").value : "range";
             let perAcc = amtSel === "custom" ? Number(document.getElementById("vaultCustomAmount").value || 0) : Number(amtSel);
             
-            if (lIdx !== "" && !isNaN(fIdx) && !isNaN(tIdx) && perAcc > 0) {
-                let s = Math.min(fIdx, tIdx), e = Math.max(fIdx, tIdx), accCount = (e - s) + 1; qtyK = accCount * perAcc; 
+            let selectedIndices = [];
+            if (mode === "range") {
+                const fIdx = parseInt(document.getElementById("vaultFrom").value), tIdx = parseInt(document.getElementById("vaultTo").value);
+                if(!isNaN(fIdx) && !isNaN(tIdx)) {
+                    let s = Math.min(fIdx, tIdx), e = Math.max(fIdx, tIdx);
+                    for(let i=s; i<=e; i++) selectedIndices.push(i);
+                }
+            } else {
+                document.querySelectorAll('.vault-indiv-cb:checked').forEach(cb => selectedIndices.push(parseInt(cb.value)));
+            }
+
+            if (lIdx !== "" && selectedIndices.length > 0 && perAcc > 0) {
+                let accCount = selectedIndices.length; qtyK = accCount * perAcc; 
                 
                 if (item === "Popularity") {
                     const g = popLabelGroups[lIdx]; let dedPop = perAcc * 1000;
-                    for(let i = s; i <= e; i++) if ((g.accounts[i].pop || 0) < dedPop) return alert(`Insufficient stock! ${g.accounts[i].name} only has ${formatStockValue(g.accounts[i].pop || 0)} Pop.`);
+                    for(let i of selectedIndices) if ((g.accounts[i].pop || 0) < dedPop) return alert(`Insufficient stock! ${g.accounts[i].name} only has ${formatStockValue(g.accounts[i].pop || 0)} Pop.`);
                 } else if (item === "Home Votes") {
                     const g = hvLabelGroups[lIdx]; let dedHV = perAcc * 1000;
-                    for(let i = s; i <= e; i++) if ((g.accounts[i].hv || 0) < dedHV) return alert(`Insufficient stock! ${g.accounts[i].name} only has ${formatStockValue(g.accounts[i].hv || 0)} HV.`);
+                    for(let i of selectedIndices) if ((g.accounts[i].hv || 0) < dedHV) return alert(`Insufficient stock! ${g.accounts[i].name} only has ${formatStockValue(g.accounts[i].hv || 0)} HV.`);
                 } else if (item === "Helicopters") {
                     const g = heliLabelGroups[lIdx]; let dedHeli = perAcc;
-                    for(let i = s; i <= e; i++) if ((g.accounts[i].heli || 0) < dedHeli) return alert(`Insufficient stock! ${g.accounts[i].name} only has ${formatStockValue(g.accounts[i].heli || 0)} Helicopters.`);
+                    for(let i of selectedIndices) if ((g.accounts[i].heli || 0) < dedHeli) return alert(`Insufficient stock! ${g.accounts[i].name} only has ${formatStockValue(g.accounts[i].heli || 0)} Helicopters.`);
                 }
 
                 order.details = item === "Helicopters" ? (qtyK + " @ ₹" + rate + "/ea") : (qtyK + "K @ ₹" + rate + "/K"); 
@@ -806,7 +866,7 @@ function saveOrder() {
                 
                 if (item === "Popularity") {
                     const g = popLabelGroups[lIdx]; let dedPop = perAcc * 1000;
-                    for(let i = s; i <= e; i++) { 
+                    for(let i of selectedIndices) { 
                         let a = g.accounts[i]; if(!a.counts) a.counts = { "1500": '', "600": '', "400": '', "200": '' }; 
                         a.pop = Math.max(0, (a.pop || 0) - dedPop); 
                         let remainingToDeduct = dedPop; const popItems = [ {k:"1500", v:1500}, {k:"600", v:600}, {k:"400", v:400}, {k:"200", v:200} ];
@@ -822,11 +882,11 @@ function saveOrder() {
                     g.total = g.accounts.reduce((sum, a) => sum + (a.pop || 0), 0); savePopLabels(); vaultDetails = ` (Vault: ${g.label} | ${accCount} Accs x ${perAcc}K)`;
                 } else if (item === "Home Votes") {
                     const g = hvLabelGroups[lIdx]; let dedHV = perAcc * 1000;
-                    for(let i = s; i <= e; i++) { let a = g.accounts[i]; a.hv = Math.max(0, (a.hv || 0) - dedHV); a.cards = Math.floor(a.hv / 100); }
+                    for(let i of selectedIndices) { let a = g.accounts[i]; a.hv = Math.max(0, (a.hv || 0) - dedHV); a.cards = Math.floor(a.hv / 100); }
                     g.total = g.accounts.reduce((sum, a) => sum + (a.hv || 0), 0); saveHVLabels(); vaultDetails = ` (Vault: ${g.label} | ${accCount} Accs x ${perAcc}K)`;
                 } else if (item === "Helicopters") {
                     const g = heliLabelGroups[lIdx]; let dedHeli = perAcc;
-                    for(let i = s; i <= e; i++) { let a = g.accounts[i]; a.heli = Math.max(0, (a.heli || 0) - dedHeli); }
+                    for(let i of selectedIndices) { let a = g.accounts[i]; a.heli = Math.max(0, (a.heli || 0) - dedHeli); }
                     g.total = g.accounts.reduce((sum, a) => sum + (a.heli || 0), 0); saveHeliLabels(); vaultDetails = ` (Vault: ${g.label} | ${accCount} Accs x ${perAcc})`;
                 }
             } else { alert("Select valid vault parameters."); return; }
@@ -850,8 +910,11 @@ function saveOrder() {
 function clearForm(){  
     ["customerName", "manualQuantity", "rate", "ucAmount", "vaultCustomAmount"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value=""; });  
     document.getElementById("fulfillmentMethod").value = "manual"; toggleFulfillmentFields();
+    if(document.getElementById("vaultSelectionMode")) document.getElementById("vaultSelectionMode").value = "range";
+    if(document.getElementById("vaultRangeDiv")) document.getElementById("vaultRangeDiv").style.display = "grid";
+    if(document.getElementById("vaultIndividualDiv")) document.getElementById("vaultIndividualDiv").style.display = "none";
 }  
-  
+
 function renderOrders(){  
     const c = document.getElementById("ordersContainer"); c.innerHTML = "";  
     [...orders].reverse().forEach(o=>{  
@@ -1091,15 +1154,114 @@ function renderInvoiceHistory(){
 function viewInvoice(id){ const inv = invoices.find(i=>i.invoiceId===id); if(!inv) return; showInvoice(inv); }
 function deleteAllInvoices(){ if(confirm("Delete all invoices?")){ invoices = []; localStorage.setItem("des_invoices",JSON.stringify(invoices)); renderInvoiceHistory(); } }  
 
+let currentEditItems = [];
+
 function openEditInvoice(id) {
     const inv = invoices.find(i => i.invoiceId === id);
     if(!inv) return;
+    
+    let det = inv.details.includes("<div") ? inv.details : `<div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;"><span><b style="color:#0f172a; font-size:15px;">${inv.item}</b><br><span style="color:#64748b; font-size:14px;">${inv.details}</span></span><b style="font-size:16px;">₹${inv.amount.toLocaleString()}</b></div>`;
+    
+    // Parse the HTML string into an array of separate items
+    let tempDiv = document.createElement('div');
+    tempDiv.innerHTML = det;
+    currentEditItems = Array.from(tempDiv.children).map(c => c.outerHTML);
+    
     document.getElementById("editInvoiceId").value = id;
     document.getElementById("editInvCustomer").value = inv.customer;
     document.getElementById("editInvAmount").value = inv.amount;
     document.getElementById("editInvPaid").value = inv.paid || 0;
     document.getElementById("editInvNote").value = "";
+    document.getElementById("editInvAppendSuccess").style.display = "none";
+    
+    renderEditCurrentItems();
+    
+    const sel = document.getElementById("editInvAddOrder");
+    sel.innerHTML = '<option value="">-- Select order to append --</option>';
+    [...orders].reverse().forEach(o => {
+        sel.innerHTML += `<option value="${o.id}">${o.id} - ${o.customer} (₹${o.amount})</option>`;
+    });
+    
     openModalSafe("editInvoiceModal");
+}
+
+function renderEditCurrentItems() {
+    const container = document.getElementById("editInvCurrentItems");
+    container.innerHTML = "";
+    
+    if(currentEditItems.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-style:italic; padding:10px 0;">No items in this bill.</div>`;
+        return;
+    }
+    
+    currentEditItems.forEach((itemHtml, idx) => {
+        let wrap = document.createElement("div");
+        wrap.style.display = "flex";
+        wrap.style.alignItems = "center";
+        wrap.style.justifyContent = "space-between";
+        wrap.style.borderBottom = "1px dashed var(--border)";
+        wrap.style.paddingBottom = "8px";
+        wrap.style.marginBottom = "8px";
+        
+        let contentDiv = document.createElement("div");
+        contentDiv.style.flex = "1";
+        contentDiv.innerHTML = itemHtml; 
+        
+        // Remove the internal bottom margin so it fits the new wrapper neatly
+        if(contentDiv.firstElementChild) {
+            contentDiv.firstElementChild.style.marginBottom = "0";
+        }
+
+        let btn = document.createElement("button");
+        btn.className = "menu-btn";
+        btn.style.width = "30px";
+        btn.style.height = "30px";
+        btn.style.minWidth = "30px";
+        btn.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
+        btn.style.marginLeft = "10px";
+        btn.innerHTML = `<span class="material-icons" style="color:var(--danger); font-size:18px;">delete</span>`;
+        btn.onclick = () => removeEditItem(idx);
+
+        wrap.appendChild(contentDiv);
+        wrap.appendChild(btn);
+        container.appendChild(wrap);
+    });
+}
+
+function removeEditItem(idx) {
+    if(!confirm("Remove this item from the bill?")) return;
+    
+    // Extract the price from the HTML using Regex to deduct it from the total
+    let itemHtml = currentEditItems[idx];
+    let match = itemHtml.match(/₹([\d,]+(\.\d+)?)/);
+    if(match) {
+        let amt = Number(match[1].replace(/,/g, ''));
+        let amtInput = document.getElementById("editInvAmount");
+        amtInput.value = Math.max(0, Number(amtInput.value) - amt);
+    }
+    
+    currentEditItems.splice(idx, 1);
+    renderEditCurrentItems();
+}
+
+function addOrderToEditedInvoice() {
+    const sel = document.getElementById("editInvAddOrder");
+    const oId = sel.value;
+    if(!oId) return alert("Select an order first.");
+    const o = orders.find(x => x.id === oId);
+    if(!o) return;
+    
+    let newItem = `<div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;"><span><b style="color:#0f172a; font-size:15px;">${o.item}</b><br><span style="color:#64748b; font-size:14px;">${o.id}</span></span><b style="font-size:16px;">₹${o.amount.toLocaleString()}</b></div>`;
+    currentEditItems.push(newItem);
+    
+    renderEditCurrentItems();
+    
+    const amtInput = document.getElementById("editInvAmount");
+    amtInput.value = Number(amtInput.value) + Number(o.amount);
+    
+    document.getElementById("editInvAppendSuccess").style.display = "block";
+    setTimeout(() => { document.getElementById("editInvAppendSuccess").style.display = "none"; }, 3000);
+    sel.value = "";
 }
 
 function closeEditInvoiceModal() {
@@ -1111,11 +1273,21 @@ function saveInvoiceEdit() {
     const inv = invoices.find(i => i.invoiceId === id);
     if(!inv) return;
     
+    let newDetails = currentEditItems.join("");
+    let itemsChanged = (inv.details !== newDetails);
+    
     inv.customer = document.getElementById("editInvCustomer").value;
     inv.amount = Number(document.getElementById("editInvAmount").value || 0);
     inv.paid = Number(document.getElementById("editInvPaid").value || 0);
+    inv.details = newDetails;
     
-    const note = document.getElementById("editInvNote").value.trim();
+    let note = document.getElementById("editInvNote").value.trim();
+    
+    // Auto-log if items were added/removed but no note was typed
+    if(itemsChanged && !note) {
+        note = "Added or removed items from bill.";
+    }
+    
     if(note) {
         if(!inv.modifications) inv.modifications = [];
         inv.modifications.push({ date: new Date().toLocaleString(), note: note });
