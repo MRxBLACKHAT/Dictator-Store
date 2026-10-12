@@ -2381,18 +2381,18 @@ function editMainAccountName() {
 }
 // --- CUSTOM POP EVENT VAULT SYSTEM ---
 
-// --- CUSTOM POP EVENT VAULT SYSTEM ---
+let openCustomSeriesSet = new Set();
 
 function openCreateCustomEventModal() {
     document.getElementById("customEventNameInput").value = "";
     document.getElementById("customEventQtyInput").value = "";
-    if (document.getElementById("customEventRapidModCheckbox")) {
-        document.getElementById("customEventRapidModCheckbox").checked = false;
-    }
+    const rapidCb = document.getElementById("customEventRapidModCheckbox");
+    if (rapidCb) rapidCb.checked = false;
+
     const container = document.getElementById("customEventSeriesSelectContainer");
     container.innerHTML = "";
 
-    if (accLabelGroups.length === 0) {
+    if (!accLabelGroups || accLabelGroups.length === 0) {
         container.innerHTML = `<div style="font-size:12px; color:var(--text-muted); text-align:center;">No account series found in Accounts Manager.</div>`;
     } else {
         accLabelGroups.forEach((g, i) => {
@@ -2413,7 +2413,8 @@ function closeCreateCustomEventModal() {
 function createCustomPopEvent() {
     const name = document.getElementById("customEventNameInput").value.trim();
     const qty = Number(document.getElementById("customEventQtyInput").value || 0);
-    const isRapid = document.getElementById("customEventRapidModCheckbox") ? document.getElementById("customEventRapidModCheckbox").checked : false;
+    const rapidEl = document.getElementById("customEventRapidModCheckbox");
+    const isRapid = rapidEl ? rapidEl.checked : false;
     const selectedCheckboxes = document.querySelectorAll(".custom-event-series-cb:checked");
 
     if (!name) return alert("Please enter an Event Name.");
@@ -2428,7 +2429,7 @@ function createCustomPopEvent() {
             group.accounts.forEach(a => {
                 compiledAccounts.push({
                     name: a.name,
-                    seriesLabel: group.label,
+                    seriesLabel: group.label || "Series",
                     ticked: false,
                     multiplier: 0
                 });
@@ -2505,26 +2506,55 @@ function viewCustomEventDetails(idx) {
     const ev = customPopEvents[idx];
     if (!ev) return;
 
+    openCustomSeriesSet.clear();
+
     document.getElementById("customEventPageTitle").innerText = ev.name;
     document.getElementById("customEventQtyPerAcc").innerText = `${formatStockValue(ev.qtyPerAcc)} (${ev.qtyPerAcc})`;
-    document.getElementById("customAccSearch").value = "";
+    const sInput = document.getElementById("customAccSearch");
+    if (sInput) sInput.value = "";
 
     renderCustomEventAccounts();
     showPage('customEventDetailsPage');
+}
+
+function toggleCustomSeriesByIndex(sIdx) {
+    if (currentCustomEventIndex === null) return;
+    const ev = customPopEvents[currentCustomEventIndex];
+    const seriesList = [];
+    ev.accounts.forEach(a => {
+        const s = a.seriesLabel || "General Series";
+        if (!seriesList.includes(s)) seriesList.push(s);
+    });
+
+    const targetSeries = seriesList[sIdx];
+    if (!targetSeries) return;
+
+    if (openCustomSeriesSet.has(targetSeries)) {
+        openCustomSeriesSet.delete(targetSeries);
+    } else {
+        openCustomSeriesSet.add(targetSeries);
+    }
+    renderCustomEventAccounts();
 }
 
 function renderCustomEventAccounts() {
     if (currentCustomEventIndex === null) return;
     const ev = customPopEvents[currentCustomEventIndex];
     const c = document.getElementById("customEventAccountsContainer");
+    if (!c) return;
     c.innerHTML = "";
 
     let totalQty = 0;
     let activeAccCount = 0;
     let totalMultipliersCount = 0;
 
-    ev.accounts.forEach(a => {
-        const m = a.multiplier !== undefined ? Number(a.multiplier) : (a.ticked ? 1 : 0);
+    const seriesGroups = {};
+    ev.accounts.forEach((acc, aI) => {
+        const sName = acc.seriesLabel || "General Series";
+        if (!seriesGroups[sName]) seriesGroups[sName] = [];
+        seriesGroups[sName].push({ ...acc, originalIndex: aI });
+
+        const m = acc.multiplier !== undefined ? Number(acc.multiplier) : (acc.ticked ? 1 : 0);
         if (m > 0) activeAccCount++;
         totalMultipliersCount += m;
         totalQty += m * (Number(ev.qtyPerAcc) || 0);
@@ -2535,7 +2565,6 @@ function renderCustomEventAccounts() {
         ? `${totalMultipliersCount}x (${activeAccCount}/${ev.accounts.length})` 
         : `${activeAccCount} / ${ev.accounts.length}`;
 
-    // Render Quick Action Buttons based on Rapid Mode
     const actionContainer = document.getElementById("customEventActionButtons");
     if (actionContainer) {
         if (ev.rapidMod) {
@@ -2557,65 +2586,101 @@ function renderCustomEventAccounts() {
         }
     }
 
-    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
-    ev.accounts.forEach((acc, aI) => {
-        const m = acc.multiplier !== undefined ? Number(acc.multiplier) : (acc.ticked ? 1 : 0);
+    let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
+    const seriesKeys = Object.keys(seriesGroups);
 
-        if (ev.rapidMod) {
-            // Rapid Multiplier Controls
-            const isZero = m === 0;
-            const cardBg = isZero ? "var(--card-bg)" : "rgba(236, 72, 153, 0.03)";
-            const cardBorder = isZero ? "var(--border)" : "rgba(236, 72, 153, 0.3)";
-            const currentAccTotal = m * (Number(ev.qtyPerAcc) || 0);
+    seriesKeys.forEach((sName, sIdx) => {
+        const groupAccs = seriesGroups[sName];
+        let sPop = 0;
+        let sActive = 0;
 
-            html += `
-                <div class="custom-event-acc-item card" style="background:${cardBg}; border:1px solid ${cardBorder}; padding:12px 16px; border-radius:14px; margin:0; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div class="custom-acc-name" style="font-weight:800; font-size:15px; color:var(--text-color);">${acc.name}</div>
-                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">
-                            ${acc.seriesLabel} &bull; <b style="color:${isZero ? 'var(--text-muted)' : '#ec4899'};">${isZero ? '0' : formatStockValue(currentAccTotal)} Pop</b>
+        groupAccs.forEach(item => {
+            const m = item.multiplier !== undefined ? Number(item.multiplier) : (item.ticked ? 1 : 0);
+            if (m > 0) sActive++;
+            sPop += m * (Number(ev.qtyPerAcc) || 0);
+        });
+
+        const isOpen = openCustomSeriesSet.has(sName);
+
+        html += `
+            <div class="custom-series-group card" data-series="${sName.toLowerCase()}" style="margin:0; padding:0; overflow:hidden; border:1px solid var(--border);">
+                <div onclick="toggleCustomSeriesByIndex(${sIdx})" style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; cursor:pointer; background:var(--card-bg); user-select:none;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="material-icons" style="font-size:22px; color:#ec4899;">folder</span>
+                        <div>
+                            <div style="font-weight:800; font-size:15px; color:var(--text-color);">${sName}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${sActive}/${groupAccs.length} Active &bull; ${groupAccs.length} accounts</div>
                         </div>
                     </div>
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        ${!isZero ? `
-                            <button onclick="decrementCustomMultiplier(${aI})" title="Decrease (-1x)" style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); color:var(--danger); width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-                                <span class="material-icons" style="font-size:18px;">remove</span>
-                            </button>
-                            <button onclick="setCustomMultiplierPrompt(${aI})" title="Type Multiplier" style="background:var(--bg-color); border:1px solid var(--border); color:var(--text-muted); width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-                                <span class="material-icons" style="font-size:16px;">edit</span>
-                            </button>
-                        ` : ''}
-                        <button onclick="incrementCustomMultiplier(${aI})" style="background:${isZero ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.12)'}; border:1px solid ${isZero ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.4)'}; padding:6px 12px; border-radius:12px; display:flex; align-items:center; gap:6px; cursor:pointer; min-width:80px; justify-content:center;">
-                            <span class="material-icons" style="font-size:18px; color:${isZero ? 'var(--danger)' : 'var(--success)'};">${isZero ? 'add' : 'check_circle'}</span>
-                            <span style="font-weight:900; font-size:14px; color:${isZero ? 'var(--danger)' : 'var(--success)'};">${isZero ? '0x' : m + 'x'}</span>
-                        </button>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="font-size:14px; font-weight:900; color:#ec4899; background:rgba(236,72,153,0.1); padding:4px 10px; border-radius:8px;">
+                            ${formatStockValue(sPop)}
+                        </div>
+                        <span class="material-icons custom-series-arrow" style="color:var(--text-muted); font-size:22px; transition:transform 0.2s ease; transform:${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};">expand_more</span>
                     </div>
-                </div>`;
-        } else {
-            // Standard Tick / Cross Controls
-            const isTicked = acc.ticked === true;
-            const iconName = isTicked ? "check_circle" : "cancel";
-            const iconColor = isTicked ? "var(--success)" : "var(--danger)";
-            const bgColor = isTicked ? "rgba(16, 185, 129, 0.05)" : "var(--card-bg)";
-            const borderColor = isTicked ? "rgba(16, 185, 129, 0.3)" : "var(--border)";
+                </div>
 
-            html += `
-                <div class="custom-event-acc-item card" style="background:${bgColor}; border:1px solid ${borderColor}; padding:12px 16px; border-radius:14px; margin:0; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div class="custom-acc-name" style="font-weight:800; font-size:15px; color:var(--text-color);">${acc.name}</div>
-                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${acc.seriesLabel}</div>
-                    </div>
-                    <button onclick="toggleCustomAccount(${aI})" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;">
-                        <span class="material-icons" style="font-size:32px; color:${iconColor}; transition: transform 0.15s ease;">${iconName}</span>
-                    </button>
-                </div>`;
-        }
+                <div class="custom-series-body" style="display:${isOpen ? 'flex' : 'none'}; flex-direction:column; gap:8px; padding:12px; background:var(--bg-color); border-top:1px dashed var(--border);">`;
+
+        groupAccs.forEach(acc => {
+            const aI = acc.originalIndex;
+            const m = acc.multiplier !== undefined ? Number(acc.multiplier) : (acc.ticked ? 1 : 0);
+
+            if (ev.rapidMod) {
+                const isZero = m === 0;
+                const cardBg = isZero ? "var(--card-bg)" : "rgba(236, 72, 153, 0.04)";
+                const cardBorder = isZero ? "var(--border)" : "rgba(236, 72, 153, 0.3)";
+                const currentAccTotal = m * (Number(ev.qtyPerAcc) || 0);
+
+                html += `
+                    <div class="custom-event-acc-item card" style="background:${cardBg}; border:1px solid ${cardBorder}; padding:10px 14px; border-radius:12px; margin:0; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div class="custom-acc-name" style="font-weight:800; font-size:14px; color:var(--text-color);">${acc.name}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+                                <b style="color:${isZero ? 'var(--text-muted)' : '#ec4899'};">${isZero ? '0' : formatStockValue(currentAccTotal)} Pop</b>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            ${!isZero ? `
+                                <button onclick="decrementCustomMultiplier(${aI})" title="Decrease (-1x)" style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); color:var(--danger); width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                                    <span class="material-icons" style="font-size:16px;">remove</span>
+                                </button>
+                                <button onclick="setCustomMultiplierPrompt(${aI})" title="Type Multiplier" style="background:var(--bg-color); border:1px solid var(--border); color:var(--text-muted); width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                                    <span class="material-icons" style="font-size:15px;">edit</span>
+                                </button>
+                            ` : ''}
+                            <button onclick="incrementCustomMultiplier(${aI})" style="background:${isZero ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.12)'}; border:1px solid ${isZero ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.4)'}; padding:6px 10px; border-radius:10px; display:flex; align-items:center; gap:6px; cursor:pointer; min-width:75px; justify-content:center;">
+                                <span class="material-icons" style="font-size:16px; color:${isZero ? 'var(--danger)' : 'var(--success)'};">${isZero ? 'add' : 'check_circle'}</span>
+                                <span style="font-weight:900; font-size:13px; color:${isZero ? 'var(--danger)' : 'var(--success)'};">${isZero ? '0x' : m + 'x'}</span>
+                            </button>
+                        </div>
+                    </div>`;
+            } else {
+                const isTicked = acc.ticked === true;
+                const iconName = isTicked ? "check_circle" : "cancel";
+                const iconColor = isTicked ? "var(--success)" : "var(--danger)";
+                const bgColor = isTicked ? "rgba(16, 185, 129, 0.05)" : "var(--card-bg)";
+                const borderColor = isTicked ? "rgba(16, 185, 129, 0.3)" : "var(--border)";
+
+                html += `
+                    <div class="custom-event-acc-item card" style="background:${bgColor}; border:1px solid ${borderColor}; padding:10px 14px; border-radius:12px; margin:0; display:flex; justify-content:space-between; align-items:center;">
+                        <div class="custom-acc-name" style="font-weight:800; font-size:14px; color:var(--text-color);">${acc.name}</div>
+                        <button onclick="toggleCustomAccount(${aI})" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;">
+                            <span class="material-icons" style="font-size:28px; color:${iconColor};">${iconName}</span>
+                        </button>
+                    </div>`;
+            }
+        });
+
+        html += `
+                </div>
+            </div>`;
     });
+
     html += '</div>';
     c.innerHTML = html;
 }
 
-// Rapid Mode Multiplier Actions
 function incrementCustomMultiplier(accIndex) {
     if (currentCustomEventIndex === null) return;
     const ev = customPopEvents[currentCustomEventIndex];
@@ -2677,7 +2742,6 @@ function bulkModifyMultipliers(mode) {
     updateRemainingStock();
 }
 
-// Standard Mode Actions
 function toggleCustomAccount(accIndex) {
     if (currentCustomEventIndex === null) return;
     const ev = customPopEvents[currentCustomEventIndex];
@@ -2703,10 +2767,41 @@ function setAllCustomAccounts(status) {
 }
 
 function filterCustomEventAccounts() {
-    const q = document.getElementById("customAccSearch").value.toLowerCase();
-    document.querySelectorAll(".custom-event-acc-item").forEach(item => {
-        const name = item.querySelector(".custom-acc-name").innerText.toLowerCase();
-        item.style.display = name.includes(q) ? "flex" : "none";
+    const searchEl = document.getElementById("customAccSearch");
+    const q = searchEl ? searchEl.value.toLowerCase().trim() : "";
+    document.querySelectorAll(".custom-series-group").forEach(groupEl => {
+        const items = groupEl.querySelectorAll(".custom-event-acc-item");
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const nameEl = item.querySelector(".custom-acc-name");
+            const name = nameEl ? nameEl.innerText.toLowerCase() : "";
+            const matches = name.includes(q);
+            item.style.display = matches ? "flex" : "none";
+            if (matches) visibleCount++;
+        });
+
+        const body = groupEl.querySelector(".custom-series-body");
+        const arrow = groupEl.querySelector(".custom-series-arrow");
+
+        if (q !== "") {
+            if (visibleCount > 0) {
+                groupEl.style.display = "block";
+                if (body) body.style.display = "flex";
+                if (arrow) arrow.style.transform = "rotate(180deg)";
+            } else {
+                groupEl.style.display = "none";
+            }
+        } else {
+            groupEl.style.display = "block";
+            const sName = groupEl.getAttribute("data-series");
+            let isOpen = false;
+            openCustomSeriesSet.forEach(s => {
+                if (s.toLowerCase() === sName) isOpen = true;
+            });
+            if (body) body.style.display = isOpen ? "flex" : "none";
+            if (arrow) arrow.style.transform = isOpen ? "rotate(180deg)" : "rotate(0deg)";
+        }
     });
 }
 
@@ -2721,7 +2816,6 @@ function deleteCustomPopEvent(i) {
         }
     }
 }
-
 
 window.onload = function() {  
     if (localStorage.getItem("des_dark_mode") === "true") { 
